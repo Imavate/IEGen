@@ -1,0 +1,197 @@
+﻿@model IEGen.Models.SubjectTemplatePageViewModel
+@{
+    ViewBag.Title = "Subject Setup";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Subject Setup
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAppAdmin)
+                {
+                    <a href="@Url.Action("Schools", "Admin")" title="View All Schools">@Model.SchoolName</a>
+                }
+                else
+                {
+                    @Model.SchoolName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="agDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="agDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default hidden-xs agAddBtn">Add New</button>
+            </div>
+        </div>
+        <table id="agDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th class="agDTFilter">Level</th>
+                    <th class="agDTFilter">Category</th>
+                    <th>Result Name</th>
+                    <th title="Order of Importance">#</th>
+                    <th>1st Term</th>
+                    <th>2nd Term</th>
+                    <th>3rd Term</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Category</th>
+                    <th>Result Name</th>
+                    <th>#</th>
+                    <th>1st Term</th>
+                    <th>2nd Term</th>
+                    <th>3rd Term</th>
+                </tr>
+            </tfoot>
+            <tbody id="agDTBody">
+                @foreach (var ag in Model.TemplateList)
+                {
+                    <tr id="@ag.TemplateID">
+                        <td><button class="btn btn-default btn-xs agDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td>@ag.Name</td>
+                        <td>@ag.LevelName</td>
+                        <td>@ag.CategoryName</td>
+                        <td>@ag.ResultName</td>
+                        <td title="Order of Importance">@ag.Order</td>
+                        <td>@ag.HasTerm1</td>
+                        <td>@ag.HasTerm2</td>
+                        <td>@ag.HasTerm3</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center"><button type="button" class="btn btn-primary agAddBtn">Add New</button></span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#agDT';
+        var editBtn = "<button class='btn btn-default btn-xs agDTBtn' title='edit'><i class='fas fa-pencil-alt'></i></button>";
+
+        $(document).ready(function () {
+
+            MyDTBtnInitCF("agDT");
+
+            var addUrl = "@Url.Action("_AddSubjectTemplate", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('.agAddBtn').click(function () {
+
+                $.ajax({
+                    url: addUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var editUrl = "@Url.Action("_EditSubjectTemplate")";
+            $(tbID).on("click", '.agDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { TemplateID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                    }
+                 });
+            });
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function AddSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Name, ag.LevelName, ag.CategoryName, ag.ResultName, ag.Order, ag.HasTerm1, ag.HasTerm2, ag.HasTerm3];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.TemplateID);
+        }
+
+        function EditSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Name, ag.LevelName, ag.CategoryName, ag.ResultName, ag.Order, ag.HasTerm1, ag.HasTerm2, ag.HasTerm3];
+
+            $(tbID).DataTable().row('#' + ag.TemplateID).data(rowData).draw('page');
+        }
+
+        function DeleteSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+        }
+    </script>
+}
+
+

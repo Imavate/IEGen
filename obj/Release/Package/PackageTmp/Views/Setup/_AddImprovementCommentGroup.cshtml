@@ -1,0 +1,30 @@
+﻿@model IEGen.Models.ImprovementCommentGroupViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Add Improvement Comment Group</h4>
+    </div>
+    @using (Ajax.BeginForm("CreateImprovementCommentGroup", "Setup", null,
+                            new AjaxOptions
+                            {
+                                OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr)"
+                            },
+                            new { @class = "modal-body form-panel-body", role = "form" }))
+    {
+        @Html.HiddenFor(m => m.SchoolID)
+
+        @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.Name)</span>
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control fm-sp" })
+
+        <input type="submit" id="SubmitBtn" style="display:none" />
+    }
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+        <button id="SubmitBtnO" class="btn btn-success" onclick="return document.getElementById('SubmitBtn').click();">Save</button>
+    </div>
+</div>

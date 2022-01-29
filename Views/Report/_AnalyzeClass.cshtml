@@ -1,0 +1,118 @@
+﻿@model IEGen.Models.AnalyzeClassViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Analyze Class Scores</h4>
+    </div>
+    <div class="modal-body form-panel-body">
+        <div class="row">
+
+            <div class="col-sm-6">
+                <label class="control-label">Name</label>
+                <p class="control-static">@Model.Name</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-sm-6">
+                <label class="control-label">Class Level</label>
+                <p class="control-static">@Model.Level</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-6">
+                <label class="control-label">CA Weight (%)</label>
+                <p class="control-static">@Model.CAWeight</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-sm-6">
+                <label class="control-label">Exam Weight (%)</label>
+                <p class="control-static">@Model.ExamWeight</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            @if (Model.IsPromotionalClass)
+            {
+                <div class="col-sm-6">
+                    <label class="control-label">Is Promotional Class?</label>
+                    <p class="control-static">@Model.IsPromotionalClass</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="control-label">Show Year Result?</label>
+                    <p class="control-static">@Model.ShowYearResult</p>
+                    <div class="fm-sp"></div>
+                </div>
+
+                <div class="col-sm-6">
+                    <label class="control-label">Promotion Comments</label>
+                    <p class="control-static">@Model.PromotionComments</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="control-label">Comment On Year Result?</label>
+                    <p class="control-static">@Model.CommentOnYearResult</p>
+                    <div class="fm-sp"></div>
+                </div>
+            }
+
+            <div class="col-sm-6">
+                <label class="control-label">Performance Comments</label>
+                <p class="control-static">@Model.PerformanceComments</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-sm-6">
+                <label class="control-label">Improvement Comments</label>
+                <p class="control-static">@Model.ImprovementComments</p>
+                <div class="fm-sp"></div>
+            </div>
+
+        </div>
+
+        <table id="pmDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Result Name</th>
+                    <th>Verified?</th>
+                </tr>
+            </thead>
+            <tbody id="pmDTBody">
+                @foreach (var pm in Model.Subjects)
+                {
+                    <tr>
+                        <td>@pm.Name</td>
+                        <td>@pm.ResultName</td>
+
+                        @if (pm.IsVerified)
+                        {
+                            <td>Verified</td>
+                        }
+                        else
+                        {
+                            <td style="color:red">Pending</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+        @using (Ajax.BeginForm("AnalyzeScores", "Report", new { ClassID = Model.ClassID },
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('AnalyzeBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('AnalyzeBtnO', 'Delete', 'MsgDiv', xhr)",
+                                    OnSuccess = "RefreshPage"
+                                },
+                                new { role = "form", style = "display:none" }))
+        {
+            <input type="submit" id="AnalyzeBtn" />
+        }
+
+        <button id="AnalyzeBtnO" class="btn btn-success" onclick="return document.getElementById('AnalyzeBtn').click();"><i class="fa fa-check"></i> Perform Analysis</button>
+    </div>
+</div>

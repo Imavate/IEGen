@@ -1,0 +1,60 @@
+﻿@model IEGen.Models.PerformanceCommentViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Edit Performance Comment</h4>
+    </div>
+    <div id="BodyDiv">
+        @using (Ajax.BeginForm("UpdatePerformanceComment", "Setup", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr)",
+                                    OnSuccess = "EditCommentSuccess"
+                                },
+                                new { @class = "modal-body form-panel-body", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.CommentID)
+
+            @Html.LabelFor(m => m.LowerBound, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.LowerBound)</span>
+            @Html.TextBoxFor(m => m.LowerBound, new { @class = "form-control fm-sp", type = "number" })
+
+            @Html.LabelFor(m => m.UpperBound, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.UpperBound)</span>
+            @Html.TextBoxFor(m => m.UpperBound, new { @class = "form-control fm-sp", type = "number" })
+
+            @Html.LabelFor(m => m.Comment, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Comment)</span>
+            @Html.TextAreaFor(m => m.Comment, 3, 50, new { @class = "form-control fm-sp" })
+
+            <span class="defname">{:NAME} = first name, {:SEX1} = he/she, {:SEX2} = him/her</span>
+
+            <input type="submit" id="SubmitBtn" style="display:none" />
+        }
+
+        <div class="modal-footer">
+            <div id="MsgDiv"></div>
+            <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+            @using (Ajax.BeginForm("DeleteGrade", "Admin", new { CommentID = Model.CommentID },
+                                    new AjaxOptions
+                                    {
+                                        OnBegin = "AddCog('DeleteBtnO', ' Processing...')",
+                                        OnFailure = "RestoreElementShowAlert('DeleteBtnO', 'Delete', 'MsgDiv', xhr)",
+                                        OnSuccess = "DeleteCommentSuccess",
+                                        Confirm = "Do you really want to delete this Performance Comment?"
+                                    },
+                                    new { role = "form", style = "display:none" }))
+            {
+                <input type="submit" id="DeleteBtn" />
+            }
+
+            <button id="DeleteBtnO" class="btn btn-warning bts" onclick="return document.getElementById('DeleteBtn').click();">Delete</button>
+
+            <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Save Changes</button>
+
+        </div>
+    </div>
+</div>

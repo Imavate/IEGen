@@ -1,0 +1,67 @@
+﻿@model IEGen.Models.SchoolRegViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">New School Request</h4>
+    </div>
+    <div class="modal-body form-panel-body">
+
+        <label class="control-label">Date</label>
+        <p class="control-static">@Model.RegDateStr</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">School</label>
+        <p class="control-static">@Model.Name</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">School Type</label>
+        <p class="control-static">@Model.Type</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Contact Person</label>
+        <p class="control-static">@Model.ContactPerson</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Email</label>
+        <p class="control-static">@Model.Email</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Phone</label>
+        <p class="control-static">@Model.Phone</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Address</label>
+        <p class="control-static">@Model.Address</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Notes</label>
+        <p class="control-static">@Model.Notes</p>
+        <div class="fm-sp"></div>
+
+
+        <div id="SchoolsDiv"></div>
+    </div>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+
+        <button id="AddToSchoolBtn" class="btn btn-success bts"><i class="fa fa-plus"></i> Add to School</button>
+
+        @using (Ajax.BeginForm("DeleteSchoolRequest", "Admin", new { SchoolRegID = Model.SchoolRegID },
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('DeleteBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('DeleteBtnO', '<i class=\"fa fa-trash-alt\"></i> Delete', 'MsgDiv', xhr)",
+                                    OnSuccess = "DeleteSuccess",
+                                    Confirm = "Do you really want to delete this School Request?"
+                                },
+                                new { role = "form", style = "display:none" }))
+        {
+            <input type="submit" id="DeleteBtn" />
+        }
+
+        <button id="DeleteBtnO" class="btn btn-warning bts" onclick="return document.getElementById('DeleteBtn').click();"><i class="fa fa-trash-alt"></i> Delete</button>
+
+        <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+    </div>
+</div>

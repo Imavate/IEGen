@@ -1,0 +1,468 @@
+﻿@model IEGen.Models.StudentPageViewModel
+@{
+    ViewBag.Title = Model.DisplayName;
+
+    var hasClassStyleAlt = Model.HasClass ? "display:none" : "";
+    var hasClassStyle = Model.HasClass ? "" : "display:none";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            @Model.DisplayName
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" style="@hasClassStyle" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+            <button id="EditFloatingBtn" class="btn btn-default btn-xs titlebtn1" style="@hasClassStyleAlt" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAppAdmin)
+                {
+                    <a href="@Url.Action("Schools", "Admin")" title="View All Schools">@Model.SchoolName</a>
+                }
+                else
+                {
+                    @Model.SchoolName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-4 col-md-2">
+            <img height="120" width="120" class="img-responsive" src="@Model.PhotoSrc" title="@Model.DisplayName" />
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-8 col-md-10">
+            <div class="row">
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">First Name</label>
+                    <p class="control-static">@Model.FirstName</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Other Name</label>
+                    <p class="control-static">@Model.OtherName</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Surname</label>
+                    <p class="control-static">@Model.Surname</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Sex</label>
+                    <p class="control-static">@Model.Sex</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Class</label>
+                    <p id="ClassP" class="control-static">@Model.ClassName</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Code</label>
+                    <p class="control-static">@Model.Code</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Birth Date</label>
+                    <p class="control-static">@Model.BirthDate</p>
+                    <div class="fm-sp"></div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label class="control-label">Location</label>
+                    <p class="control-static">@Model.LocationDesc</p>
+                    <div class="fm-sp"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <button id="UploadResultsBtn" class="btn btn-default bts">Upload Result CSV</button>
+
+                    @if (Model.Results.Any())
+                    {
+                        <button id="DownloadResultsBtn" class="btn btn-default bts">Download Result CSV</button>
+                    }
+                    else
+                    {
+                        if (Model.HasClass)
+                        {
+                            <button id="RemoveClassBtn" class="btn btn-warning bts">Remove Class</button>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Results.Any())
+{
+    <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title">Results</h4></div>
+        <div class="wide-panel-body">
+            <div class="row">
+                <div class="col-sm-6 col-md-5">
+                    <div class="input-group">
+                        <input type="search" id="srDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                        <span class="input-group-btn">
+                            <button id="srDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                                <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <table id="srDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+                <thead>
+                    <tr>
+                        <th data-orderable="false" data-searchable="false"></th>
+                        <th>Term</th>
+                        <th>Class</th>
+                        <th title="Number of Subjects">#</th>
+                        <th>Low</th>
+                        <th>Avg.</th>
+                        <th>High</th>
+                        <th>Imp.</th>
+                        <th>Pos.</th>
+                        <th>Best Subject</th>
+                    </tr>
+                </thead>
+                <tbody id="srDTBody">
+                    @foreach (var ag in Model.Results)
+                    {
+                        <tr id="@ag.ClassID">
+                            <td><button class="btn btn-default btn-xs srDTBtn" title="print"><i class="fa fa-print"></i></button></td>
+                            <td>@ag.TermName</td>
+                            <td>@ag.ClassName</td>
+                            <td title="Number of Subjects">@ag.SubjectCount</td>
+                            <td>@ag.LowStr</td>
+                            <td>@ag.AvgStr</td>
+                            <td>@ag.HighStr</td>
+                            <td>@ag.ImpFull</td>
+                            <td>@ag.Position</td>
+                            <td>@ag.BestSubjectName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (Model.PastResults.Any())
+{
+    <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title">Past Results</h4></div>
+        <div class="wide-panel-body">
+            <div class="row">
+                <div class="col-sm-6 col-md-5">
+                    <div class="input-group">
+                        <input type="search" id="psrDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                        <span class="input-group-btn">
+                            <button id="psrDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                                <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <table id="psrDT" class="table table-hover table-bordered fullwidth" data-order="[[0, &quot;desc&quot;], [2, &quot;asc&quot;]]">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Level</th>
+                        <th>Subject</th>
+                        <th>Category</th>
+                        <th>1st Term</th>
+                        <th>2nd Term</th>
+                        <th>3rd Term</th>
+                        <th>Average</th>
+                    </tr>
+                </thead>
+                <tbody id="psrDTBody">
+                    @foreach (var ag in Model.PastResults)
+                    {
+                        <tr>
+                            <td>@ag.Year</td>
+                            <td>@ag.LevelName</td>
+                            <td>@ag.SubjectName</td>
+                            <td>@ag.CategoryName</td>
+                            <td>@ag.Term1ScoreStr</td>
+                            <td>@ag.Term2ScoreStr</td>
+                            <td>@ag.Term3ScoreStr</td>
+                            <td>@ag.AverageStr</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#srDT';
+        var schoolID = '@Model.HeaderViewModel.SchoolID';
+
+        $(document).ready(function () {
+
+            if ($('#srDT').length) {
+                MyDTBtnInit("srDT");
+            }
+
+            var editUrl = "@Url.Action("_EditStudent", new { StudentID = Model.StudentID })";
+            var defTermName = "@Model.DefTermName";
+            var defTermID = "@Model.DefTermID";
+            $('#EditBtn').click(function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { DefTermID: defTermID, DefTermName: defTermName },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeEdit();
+                     }
+                 });
+            });
+
+            var editFloatingUrl = "@Url.Action("_EditFloatingStudent", new { StudentID = Model.StudentID, DefTermID = Model.DefTermID, DefTermName = Model.DefTermName })";
+            $('#EditFloatingBtn').click(function () {
+
+                 $.ajax({
+                     url: editFloatingUrl,
+                     data: { },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeFloatingEdit();
+                     }
+                 });
+            });
+
+            var resUrl = "@Url.Action("PrintStudentResult", "Report", new { StudentID = Model.StudentID, ClassID = 123 })";
+            $(tbID).on("click", '.srDTBtn', function () {
+
+                //window.open(resUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank', 'location=yes,height=850,width=600,scrollbars=yes,status=yes'); //72ppi
+                //window.open(resUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank', 'location=yes,height=1130,width=800,scrollbars=yes,status=yes');  //96ppi
+                window.open(resUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank');
+            });
+
+            var downloadUrl = "@Url.Action("_DownloadResultCSV")";
+            var studentID = '@Model.StudentID';
+            var studentName = '@Model.DisplayName';
+            $('#DownloadResultsBtn').click(function () {
+
+                var data = {
+                    StudentID: studentID, StudentName: studentName
+                };
+
+                window.location = downloadUrl + '?' + $.param(data);
+            });
+
+
+            var remClassUrl = "@Url.Action("RemoveStudentClass")";
+            $('#RemoveClassBtn').click(function () {
+
+                $.post({
+                    url: remClassUrl,
+                    data: { StudentID: studentID, DisplayName: studentName },
+                    global: false,
+                    beforeSend: function (xhr) {
+                        var proceed = confirm("Are you sure you want to remove this student's class?");
+
+                        if (proceed) {
+                            AddCog('RemoveClassBtn', ' Processing...');
+                        }
+
+                        return proceed;
+                    },
+                    error: function (xhr, status, error) {
+                        RestoreElementShowAlert('RemoveClassBtnBtn', 'Remove Class', 'AlertDiv', xhr);
+                    },
+                    success: function (r) {
+                        $('#AlertDiv').html(r);
+                        $(".alert").show(300);
+
+                        $('#RemoveClassBtn').hide();
+                        $('#EditBtn').hide();
+                        $('#EditFloatingBtn').show();
+                        $('#ClassP').html("-");
+                    }
+                });
+            });
+
+            var startUploadUrl = "@Url.Action("_StartResultUpload", new { StudentID = Model.StudentID })";
+            $('#UploadResultsBtn').click(function () {
+
+                 $.ajax({
+                     url: startUploadUrl,
+                     data: { },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeUpload();
+                     }
+                 });
+            });
+
+            if ($('#psrDT').length) {
+                MyDTBtnInit("psrDT");
+            }
+        });
+
+        function ShowModal(content) {
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function ReplaceModal(content) {
+            $('#PViewContainer').html(content);
+
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function ActionSuccess(data) {
+
+            window.location = window.location;
+        }
+
+        var updateUrl = '@Url.Action("UpdateStudent")';
+        function InitializeEdit() {
+
+            InitializeDatePicker("BirthDate");
+
+            var options = {
+                type: "POST",
+                url: updateUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UpdateForm').ajaxForm(options);
+        }
+
+        var updateFloatingUrl = '@Url.Action("UpdateFloatingStudent")';
+        function InitializeFloatingEdit() {
+
+            InitializeDatePicker("BirthDate");
+
+            var options = {
+                type: "POST",
+                url: updateFloatingUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UpdateForm').ajaxForm(options);
+        }
+
+
+        var uploadUrl = '@Url.Action("UploadStudentResult")';
+        function InitializeUpload() {
+
+            var options = {
+                type: "POST",
+                url: uploadUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (r) {
+                    ReplaceModal(r);
+                    InitializeVerify();
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UploadForm').ajaxForm(options);
+        }
+
+        function UploadSuccess(data) {
+
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+        var finishUrl = '@Url.Action("FinishResultUpload")';
+        function InitializeVerify() {
+
+            var options = {
+                type: "POST",
+                url: finishUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    UploadSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UploadForm').ajaxForm(options);
+        }
+
+    </script>
+}

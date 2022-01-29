@@ -1,0 +1,410 @@
+﻿@model IEGen.Models.OtherExamReportPageViewModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Student Report - " + Model.Name;
+
+    var cnt = 0;
+}
+
+@foreach (var rep in Model.Reports)
+{
+    if (cnt > 0)
+    {
+        <div style="page-break-before: always;"></div>
+    }
+
+    cnt++;
+
+    var tabClass = rep.ScoreCount > 12 ? "scoreprint" : "";
+    var chartHeight = "335";
+    var chartHeightPx = chartHeight + "px";
+    var comPad = "form-pad";
+
+        <div class="panel panel-default" style="width:730px;">
+            <div class="form-panel-body row flexrow" style="padding-top:2px;">
+                <div style="width:125px; padding:0px 2px; border-right:1px solid #ddd;">
+                    <img height="120" width="120" class="img-responsive" src="@rep.LogoSrc" />
+                </div>
+                <div style="width:478px; padding:0;">
+                    <div style="font-size:16px; font-weight:bold; color:blue !important; text-align:center">@rep.SchoolName</div>
+                    <div class="fm-sp"></div>
+
+                    <div style="text-align:center">
+                        <div style="display:inline-block">
+                            <div class="flexrow">
+                                <div class="div">
+                                    <label class="control-label">Name: </label>
+                                    <span class="control-static">@rep.DisplayName</span>
+                                </div>
+                                @if (rep.ShowCode)
+                                {
+                                    <div class="div">
+                                        <label class="control-label">Code: </label>
+                                        <span class="control-static">@rep.Code</span>
+                                    </div>
+                                }
+                                <div class="div" style="padding-right:0">
+                                    <label class="control-label">Class: </label>
+                                    <span class="control-static">@rep.ClassName</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fm-sp"></div>
+                    <div class="pad-t5" style="border-bottom:1px solid #ddd"></div>
+                    <div class="fm-sp"></div>
+                    <div class="row" style="padding:0 2px;">
+                        <div class="col-xs-2">
+                            <label class="control-label">Lowest</label>
+                            <p class="control-static">@rep.LowStr</p>
+                            <div class="fm-sp"></div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label class="control-label">Average</label>
+                            <p class="control-static">@rep.AvgStr</p>
+                            <div class="fm-sp"></div>
+                        </div>
+                        <div class="col-xs-2">
+                            <label class="control-label">Highest</label>
+                            <p class="control-static">@rep.HighStr</p>
+                            <div class="fm-sp"></div>
+                        </div>
+                        <div class="col-xs-2">
+                            @if (rep.ShowPosition)
+                            {
+                                <label class="control-label">Position</label>
+                                <p class="control-static">@Html.Raw(rep.PosStr)</p>
+                            }
+                            else
+                            {
+                                <label class="control-label">Class Size</label>
+                                <p class="control-static">@Html.Raw(rep.StudentCount)</p>
+                            }
+                            <div class="fm-sp"></div>
+                        </div>
+                        <div class="col-xs-4">
+                            <label class="control-label">Best Subject</label>
+                            <p class="control-static">@rep.BestSubjectName</p>
+                            <div class="fm-sp"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="width:125px; padding:0px 2px; border-left:1px solid #ddd;">
+                    <img height="120" width="120" class="img-responsive pull-right" src="@rep.PhotoSrc" />
+                </div>
+            </div>
+
+            <div class="panel panel-info">
+                <div class="panel-heading info-heading">@rep.ExamName - @rep.TermName</div>
+                <div class="table-panel-body defprint">
+                    <div class="row">
+                        <div class="col-xs-5 wide-right">
+                            <table class="table table-bordered table-striped fullwidth defprint @tabClass" style="margin-bottom:0">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                        <th>Class Avg.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in rep.Scores)
+                                    {
+                                        var TotalStyle = s.Total < rep.RedLine ? "color:#ff0000 !important;" : "";
+                                        <tr>
+                                            <td style="background-color:#ddeeff !important;"><b>@s.ResultName</b></td>
+                                            <td style="background-color:#f9f2b3 !important;"><b style="@TotalStyle">@s.TotalStr</b></td>
+                                            <td style="background-color:#f9f2b3 !important;">
+                                                @if (rep.ShowSummaryGrade)
+                                                {
+                                                    <b>@s.SummaryGrade</b>
+                                                }
+                                                else
+                                                {
+                                                    <b>@s.GradeName</b>
+                                                }
+                                            </td>
+                                            <td>@s.ClassAvgStr</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-xs-7 wide-left2">
+
+                            <div class="pull-left" style="position:relative">
+                                <div style="position:absolute;top:129px;left:74px;font-size:14px"><b>Grade Distribution</b></div>
+                                <div style="width:270px;height:270px; padding:5px">
+                                    <canvas id="@rep.GradeChartID" width="600" height="600"></canvas>
+                                </div>
+                            </div>
+                            <div class="pull-right pieLegendRes">
+                                @if (rep.HasLegendA)
+                                {
+                                    <div class="fm-sp"><button class="btn btn-default pieA"></button> A @rep.LegendA</div>
+                                }
+                                @if (rep.HasLegendB)
+                                {
+                                    <div class="fm-sp"><button class="btn btn-default pieB"></button> B @rep.LegendB</div>
+                                }
+                                @if (rep.HasLegendC)
+                                {
+                                    <div class="fm-sp"><button class="btn btn-default pieC"></button> C @rep.LegendC</div>
+                                }
+                                @if (rep.HasLegendD)
+                                {
+                                    <div class="fm-sp"><button class="btn btn-default pieD"></button> D @rep.LegendD</div>
+                                }
+                                @if (rep.HasLegendE)
+                                {
+                                    <div class="fm-sp"><button class="btn btn-default pieE"></button> E @rep.LegendE</div>
+                                }
+                                @if (rep.HasLegendF)
+                                {
+                                    <div class="fm-sp"><button class="btn btn-default pieF"></button> F @rep.LegendF</div>
+                                }
+                            </div>
+                            <div class="clearboth"></div>
+                            <div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading info-heading">Grade Summary</div>
+                                    <div class="panel-body8 flexrow">
+                                        <div class="div">
+                                            <label class="control-label">A:</label>
+                                            <span class="control-static">@rep.GradeCountAStr</span>
+                                        </div>
+                                        <div class="div">
+                                            <label class="control-label">B:</label>
+                                            <span class="control-static">@rep.GradeCountBStr</span>
+                                        </div>
+                                        <div class="div">
+                                            <label class="control-label">C:</label>
+                                            <span class="control-static">@rep.GradeCountCStr</span>
+                                        </div>
+                                        <div class="div">
+                                            <label class="control-label">D:</label>
+                                            <span class="control-static">@rep.GradeCountDStr</span>
+                                        </div>
+                                        <div class="div">
+                                            <label class="control-label">E:</label>
+                                            <span class="control-static">@rep.GradeCountEStr</span>
+                                        </div>
+                                        <div class="div">
+                                            <label class="control-label">F:</label>
+                                            <span class="control-static">@rep.GradeCountFStr</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="zero-panel-body row ">
+                <div class="col-xs-10 wide-right">
+                    <div style="width:610px;height:@chartHeightPx;">
+                        <canvas id="@rep.ChartID" width="610" height="@chartHeight"></canvas>
+                    </div>
+                </div>
+                <div class="col-xs-2 wide-left2">
+                    <div class="panel panel-default">
+                        <div class="panel-heading info-heading">Grading Guide</div>
+                        <div class="table-panel-body">
+                            <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                                <tbody>
+                                    @foreach (var g in rep.GradeRows)
+                                    {
+                                        <tr>
+                                            <td>@g.LowerBound - @g.UpperBound</td>
+                                            <td>@g.Name</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="hr-b10" style="border-color:#999;margin-top:5px;" />
+
+            <div class="wide-panel-body defprint">
+                <div class="div sp-t5 @comPad">
+                    <label class="control-label">Class Teacher's Comments: </label>
+                    <span class="control-static">@rep.TeacherComment</span>
+                </div>
+                <div class="div sp-t5 @comPad">
+                    <label class="control-label">@rep.PrincipalCommentText </label>
+                    <span class="control-static">@rep.PerformanceComment</span>
+                </div>
+            </div>
+            <div class="zero-panel-body row">
+                <div class="col-xs-12">
+                    <div style="padding:0 1px 0 3px; background-color:#ddd !important; margin:2px; font-size:9px;">
+                        <span>&copy; @DateTime.Now.Year Imavate Education</span>
+                        <span style="margin-left:75px;">Improving Student Academic Performance through Research and Statistical Analysis</span>
+                        <div class="pull-right" style="margin-top: -15px;">
+                            <img height="25" width="109" src="~/Content/Images/logo_tight.png" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/chart")
+
+    @foreach (var rep in Model.Reports)
+    {
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+
+                
+                var gCountA = @rep.GradeCountA;
+                var gCountB = @rep.GradeCountB;
+                var gCountC = @rep.GradeCountC;
+                var gCountD = @rep.GradeCountD;
+                var gCountE = @rep.GradeCountE;
+                var gCountF = @rep.GradeCountF;
+
+                var gctx = document.getElementById("@rep.GradeChartID");
+
+                data = {
+                    datasets: [{
+                        data: [gCountA, gCountB, gCountC, gCountD, gCountE, gCountF],
+                        backgroundColor: ['#800080', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#FF0000'],
+                        borderColor: '#FF5A5E',
+                        borderWidth: 1
+                    }],
+
+                    labels: ['A', 'B', 'C', 'D', 'E', 'F']
+                };
+
+                var chartOptions = {
+                    animation: false,
+                    devicePixelRatio: 2,
+                    legend: {
+                        display: false
+                    },
+                    plugins: {
+                        labels: [
+                            {
+                                render: 'percentage',
+                                fontStyle: 'bold',
+                                fontColor: ['#fff', '#fff'],
+                                precision: 2
+                            }
+                        ]
+                    }
+                };
+
+                var gradeChart = new Chart(gctx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: chartOptions
+                });
+
+
+                var subjects = @Html.Raw(rep.SubjectNames);
+                var lowScores = @rep.LowScoresJson;
+                var avgScores = @rep.AvgScoresJson;
+                var bestScores = @rep.MaxScoresJson;
+                var scores = @rep.ScoresJson;
+                var failure = @rep.FailureLine;
+                var chartText = 'Subject Performance Summary';
+
+                var sctx = document.getElementById("@rep.ChartID");
+
+                var scoreChart = new Chart(sctx, {
+                    type: 'bar',
+                    data: {
+                        labels: subjects,
+                        datasets: [{
+                            label: 'Student Scores',
+                            data: scores,
+                            backgroundColor: 'rgba(75, 220, 75, 0.2)',
+                            borderColor: 'rgba(75, 220, 75, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pass Mark',
+                            data: failure,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(255, 0, 0, 1)',
+                            borderWidth: 1,
+                            pointRadius:0,
+                            type: 'line'
+                        },
+                        {
+                            label: 'Lowest',
+                            data: lowScores,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(120,120,120,1)',
+                            borderWidth: 2,
+                            type: 'line'
+                        },
+                        {
+                            label: 'Average',
+                            data: avgScores,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(255, 165, 0, 1)',
+                            borderWidth: 2,
+                            type: 'line'
+                        },
+                        {
+                            label: 'Highest',
+                            data: bestScores,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(0, 0, 255, 1)',
+                            borderWidth: 2,
+                            type: 'line'
+                        }]
+                    },
+                    options: {
+                        title:{
+                            display: true,
+                            fontSize: 14,
+                            fontColor: '#000',
+                            text: chartText
+                        },
+                        animation: false,
+                        devicePixelRatio: 2,
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    autoSkip: false
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true,
+                                    max: 100
+                                }
+                            }]
+                        },
+                        plugins: {
+                            labels: [
+                              {
+                                  render: 'value',
+                                  fontSize: 0
+                              }
+                            ]
+                        }
+
+                    }
+                });
+            });
+
+
+
+
+        </script>
+    }
+
+}

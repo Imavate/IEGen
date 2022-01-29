@@ -1,0 +1,104 @@
+﻿@model IEGen.Models.ClassSkillMViewModel
+
+<div id="AlertDiv"></div>
+@using (Ajax.BeginForm("ModifySkillEntry", "Data", null,
+                        new AjaxOptions
+                        {
+                            OnBegin = "AddCog('SubmitBtn', ' Processing...')",
+                            OnFailure = "ProcessVerifyError(xhr, status, error)"
+                        },
+                        new { role = "form" }))
+{
+    @Html.HiddenFor(m => m.ClassID)
+    @Html.TextBoxFor(m => m.MaxScore, new { @class = "hideval" })
+    <table id="csDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student</th>
+                <th>@Model.Skill1</th>
+                <th>@Model.Skill2</th>
+                <th>@Model.Skill3</th>
+                <th>@Model.Skill4</th>
+                <th>@Model.Skill5</th>
+                <th>@Model.Skill6</th>
+            </tr>
+        </thead>
+        <tbody id="csDTBody">
+            @for (int i = 0; i < Model.Entries.Count; i++)
+            {
+            <tr>
+                <td>@Model.Entries[i].SerialNumber</td>
+                <td>@Model.Entries[i].DisplayName</td>
+                <td class="crel">
+                    @Html.HiddenFor(m => m.Entries[i].SerialNumber)
+                    @Html.HiddenFor(m => m.Entries[i].DisplayName)
+                    @Html.HiddenFor(m => m.Entries[i].StudentID)
+                    @Html.HiddenFor(m => m.Entries[i].MinScore)
+                    @Html.HiddenFor(m => m.Entries[i].MaxScore)
+                    @Html.HiddenFor(m => m.Entries[i].SkillScore1)
+                    @Html.HiddenFor(m => m.Entries[i].SkillScore1V)
+                    <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore1M)</span>
+                    @if (i == 0)
+                    {
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore1M, new { @class = "form-control ftext", type = "number" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore1M, new { @class = "form-control", type = "number" })
+                    }
+                </td>
+                <td class="crel">
+                    @if (Model.HasSkill2)
+                    {
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore2)
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore2V)
+                        <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore2M)</span>
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore2M, new { @class = "form-control", type = "number" })
+                    }
+                </td>
+                <td class="crel">
+                    @if (Model.HasSkill3)
+                    {
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore3)
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore3V)
+                        <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore3M)</span>
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore3M, new { @class = "form-control", type = "number" })
+                    }
+                </td>
+                <td class="crel">
+                    @if (Model.HasSkill4)
+                    {
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore4)
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore4V)
+                        <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore4M)</span>
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore4M, new { @class = "form-control", type = "number" })
+                    }
+                </td>
+                <td class="crel">
+                    @if (Model.HasSkill5)
+                    {
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore5)
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore5V)
+                        <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore5M)</span>
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore5M, new { @class = "form-control", type = "number" })
+                    }
+                </td>
+                <td class="crel">
+                    @if (Model.HasSkill6)
+                    {
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore6)
+                        @Html.HiddenFor(m => m.Entries[i].SkillScore6V)
+                        <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore6M)</span>
+                        @Html.TextBoxFor(m => m.Entries[i].SkillScore6M, new { @class = "form-control", type = "number" })
+                    }
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <button id="SubmitBtn" class="btn btn-success">Validate Entries</button>
+
+    @Html.ActionLink("Cancel", "Skills", null, new { @class = "btn btn-default" })
+}

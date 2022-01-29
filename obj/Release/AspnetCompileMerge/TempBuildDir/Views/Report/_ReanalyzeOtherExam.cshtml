@@ -1,0 +1,69 @@
+﻿@model IEGen.Models.OtherExamAnalysisModel
+
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Reanalyze Other Exam</h4>
+    </div>
+    <div class="modal-body form-panel-body">
+
+        <label class="control-label">Exam</label>
+        <p class="control-static">@Model.ExamName</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Class</label>
+        <p class="control-static">@Model.ClassName</p>
+        <div class="fm-sp"></div>
+
+        <table id="pmDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Result Name</th>
+                    <th>Verified?</th>
+                </tr>
+            </thead>
+            <tbody id="pmDTBody">
+                @foreach (var pm in Model.Subjects)
+                {
+                    <tr>
+                        <td>@pm.Name</td>
+                        <td>@pm.ResultName</td>
+                        <td>
+                            @if (pm.IsVerified)
+                            {
+                                <span>Verified</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger">Pending</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+
+        @using (Ajax.BeginForm("RegenerateOtherExamReports", "Report", new { ClassID = Model.ClassID, ExamID = Model.OtherExamID, TypeID = Model.TypeID },
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Regenerate Reports', 'MsgDiv', xhr)",
+                                    OnSuccess = "RefreshPage"
+                                },
+                                new { role = "form", style = "display:none" }))
+        {
+            <input type="submit" id="SubmitBtn" style="display:none" />
+        }
+        <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Regenerate Reports</button>
+
+    </div>
+</div>
+

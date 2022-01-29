@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="DataSource-Web.config Connection String" description="DataSource Connection String used in web.config by the application to access the database." defaultValue="Thinkpad-W541\SQLEXPRESS; Initial Catalog=IEGENDB; User Id=iegenuser; " tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Imavate\\Documents\\Visual\ Studio\ 2017\\Projects\\IEApps\\IEGen\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='DataSource']/@connectionString" />
+  </parameter>
+  <parameter name="FileDataSource-Web.config Connection String" description="FileDataSource Connection String used in web.config by the application to access the database." defaultValue="Thinkpad-W541\SQLEXPRESS; Initial Catalog=IEGENFILEDB; User Id=iegenuser; " tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Imavate\\Documents\\Visual\ Studio\ 2017\\Projects\\IEApps\\IEGen\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='FileDataSource']/@connectionString" />
+  </parameter>
+  <parameter name="IPSDataSource-Web.config Connection String" description="IPSDataSource Connection String used in web.config by the application to access the database." defaultValue="Thinkpad-W541\SQLEXPRESS; Initial Catalog=IPSDB; User Id=ipsuser; " tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Imavate\\Documents\\Visual\ Studio\ 2017\\Projects\\IEApps\\IEGen\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='IPSDataSource']/@connectionString" />
+  </parameter>
+</parameters>

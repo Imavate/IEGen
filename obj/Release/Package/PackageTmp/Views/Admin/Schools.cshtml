@@ -1,0 +1,306 @@
+﻿@model IEGen.Models.SchoolPageViewModel
+@{
+    ViewBag.Title = "Schools";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Schools
+            <span class="pull-right hidden-xs">Default: <b id="defSchool">@Model.DefaultSchool</b></span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="uDTSSSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="uDTSSSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <button id="uDTSS_FiltersBtn" class="btn btn-default">More Filters</button>
+                <button type="button" class="btn btn-default uAddBtn">Add New</button>
+
+                <button type="button" class="btn btn-default pull-right export"><i class="fa fa-file-excel"></i> Export All</button>
+            </div>
+        </div>
+        <div id="uDTSS_FiltersRow" class="filter-div" style="display:none">
+            <div class="panel panel-primary">
+                <div class="row filter-row">
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Location</label>
+                        @Html.DropDownListFor(m => m.LocationFilter, Model.LocationList, new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">State</label>
+                        @Html.EnumDropDownListFor(m => m.StateFilter, "-- All States --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Type</label>
+                        @Html.EnumDropDownListFor(m => m.TypeFilter, "-- All Types --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Status</label>
+                        @Html.EnumDropDownListFor(m => m.StatusFilter, "-- Every Status --", new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table id="uDTSS" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25"></table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#uDTSS';
+
+        $(document).ready(function () {
+
+            var columns = [{
+                "title": "",
+                "data": "Button",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "",
+                "data": "DefButton",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Name",
+                "data": "Name",
+                "searchable": true
+            },
+            {
+                "title": "Type",
+                "data": "Type",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Location",
+                "data": "LocationDesc",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Address",
+                "data": "Address",
+                "searchable": true
+            },
+            {
+                "title": "Email",
+                "data": "Email",
+                "searchable": true
+            },
+            {
+                "title": "Phone",
+                "data": "Phone",
+                "searchable": true
+            }];
+
+            var nodata = function (data) { };
+
+            var uDTSS_data = function (data) {
+                data.LocationID = $("#LocationFilter").val();
+                data.TypeID = $("#TypeFilter").val();
+                data.StateID = $("#StateFilter").val();
+                data.StatusID = $("#StatusFilter").val();
+            };
+
+            MyDTBtnInitSS("uDTSS", "@Url.Action("GetSchoolList", "Admin", null)", columns, uDTSS_data);
+
+
+            //for server side... no auto post back
+            $("#uDTSSSearchBox").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    $("#uDTSSSearchBtn").click();
+                }
+            });
+
+            $('#uDTSS_FiltersBtn').click(function () {
+                $('#uDTSS_FiltersRow').toggle();
+
+                if ($("#LocationFilter").val() != "" || $("#TypeFilter").val() != "" || $("#StateFilter").val() != "" || $("#StatusFilter").val() != "")
+                    $('#uDTSS_FiltersBtn').html('More Filters <i class="fa fa-filter fa-lg text-primary"></i>');
+                else
+                    $('#uDTSS_FiltersBtn').html("More Filters");
+
+                //going from open to close... note that toggle has already been called
+                if ($('#uDTSS_FiltersRow').css('display') === 'none') {
+                    $("#uDTSSSearchBtn").click();
+                }
+            });
+
+            var addSchoolUrl = "@Url.Action("_AddSchool")";
+            $('.uAddBtn').click(function () {
+
+                $.ajax({
+                    url: addSchoolUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        InitializeAdd();
+                    }
+                });
+            });
+
+            var editSchoolUrl = "@Url.Action("_EditSchool")";
+            $(tbID).on("click", '.uDTBtn', function () {
+
+                 $.ajax({
+                     url: editSchoolUrl,
+                     data: { SchoolID: $(this).data('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeEdit();
+                     }
+                 });
+            });
+
+            var defUrl = "@Url.Action("SetDefSchool")";
+            var userid = '@Model.HeaderViewModel.UserID';
+            $(tbID).on("click", '.defBtn', function () {
+
+                $.ajax({
+                    url: defUrl,
+                    data: { SchoolID: $(this).data('id'), UserID: userid },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    error: function (xhr, status, error) {
+                        ShowAlertMsg('MsgDiv', xhr);
+                    }
+                });
+            });
+
+            $('.export').click(function () {
+
+                $("#uDTSSSearchBtn").click();
+                Download();
+
+            });
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function ActionSuccess(data) {
+
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+
+            $(tbID).DataTable().ajax.reload(null, false);
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+        var createUrl = '@Url.Action("CreateSchool")';
+        function InitializeAdd() {
+
+            var options = {
+                type: "POST",
+                url: createUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#AddForm').ajaxForm(options);
+        }
+
+        var updateUrl = '@Url.Action("UpdateSchool")';
+        function InitializeEdit() {
+
+            var options = {
+                type: "POST",
+                url: updateUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UpdateForm').ajaxForm(options);
+        }
+
+        var downloadUrl = "@Url.Action("_DownloadSchools")";
+        function Download() {
+
+            var locid = $("#LocationFilter").val();
+            var typeid = $("#TypeFilter").val();
+            var stateid = $("#StateFilter").val();
+            var statusid = $("#StatusFilter").val();
+            var search = $("#uDTSSSearchBox").val();
+
+            var data = {
+                LocationID: locid, TypeID: typeid, StateID: stateid, StatusID: statusid, Search: search
+            };
+
+            window.location = downloadUrl + '?' + $.param(data);
+
+        }
+
+    </script>
+}

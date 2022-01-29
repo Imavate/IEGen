@@ -1,0 +1,197 @@
+﻿@model IEGen.Models.TermSubjectPerformanceModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Class Level Subject Performance - " + Model.TermName;
+
+    var cnt = 0;
+}
+
+@foreach (var rep in Model.LevelStats)
+{
+    if (cnt > 0)
+    {
+        <div style="page-break-before: always;"></div>
+    }
+
+    cnt++;
+
+    <div class="panel panel-default defprint">
+        <div class="panel-heading">
+            <div class="panel-title">
+                Class Level Subject Performance - <b>@rep.LevelName</b>
+
+                <span class="pull-right">@Model.TermName</span>
+            </div>
+        </div>
+        <div class="form-panel-body row">
+            <div class="col-xs-6">
+                <label class="control-label">School</label>
+                <p class="control-static">@Model.SchoolName</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-4">
+                <label class="control-label">Term</label>
+                <p class="control-static">@Model.TermName</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label">Level</label>
+                <p class="control-static">@rep.LevelName</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="clearboth"></div>
+            <div class="col-xs-2">
+                <label class="control-label"># Subjects</label>
+                <p class="control-static">@rep.SubjectCount</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label"># Results</label>
+                <p class="control-static">@rep.ResultCount</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label">Low. Avg.</label>
+                <p class="control-static">@rep.LowAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label">Mean Avg.</label>
+                <p class="control-static">@rep.MeanAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label">Best Avg.</label>
+                <p class="control-static">@rep.BestAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label">Best Subject</label>
+                <p class="control-static">@rep.BestSubjectName</p>
+                <div class="fm-sp"></div>
+            </div>
+        </div>
+        <div style="border-top:1px solid #ddd"></div>
+        <div style="width:690px;height:350px;">
+            <canvas id="@rep.BarChartID" width="690" height="350"></canvas>
+        </div>
+        <div class="wide-panel-body">
+            <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Result</th>
+                        <th># Subjects</th>
+                        <th># Pupils</th>
+                        <th>Low.</th>
+                        <th>Avg.</th>
+                        <th>High.</th>
+                        <th>Best Pupil</th>
+                    </tr>
+                </thead>
+                <tbody id="clDTBody">
+                    @foreach (var s in rep.Stats)
+                    {
+                        <tr>
+                            <td style="background-color:#ddeeff !important;"><b>@s.Name</b></td>
+                            <td>@s.ResultName</td>
+                            <td>@s.SubjectCount</td>
+                            <td>@s.ResultCount</td>
+                            <td>@s.LowStr</td>
+                            <td style="background-color:#f9f2b3 !important;">@s.AvgStr</td>
+                            <td>@s.HighStr</td>
+                            <td>@s.BestStudentName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <span>&copy; @DateTime.Now.Year Imavate Education</span><span class="pull-right">www.imavate-edu.com</span>
+
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/chart")
+
+    @foreach (var rep in Model.LevelStats)
+    {
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+
+                var subjects = @Html.Raw(rep.Subjects);
+                var lowest = @rep.LowScores;
+                var averages = @rep.AvgScores;
+                var highest = @rep.HighScores;
+                var title = '@rep.LevelName' + ' Subject Performance'
+
+                var lctx = document.getElementById("@rep.BarChartID");
+
+                var categoryChart = new Chart(lctx, {
+                    type: 'bar',
+                    data: {
+                        labels: subjects,
+                        datasets: [{
+                            label: 'Lowest',
+                            data: lowest,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255,99,132,1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Average',
+                            data: averages,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Highest',
+                            data: highest,
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        title: {
+                            display: true,
+                            fontSize: 14,
+                            fontColor: '#000',
+                            text: title
+                        },
+                        animation: false,
+                        devicePixelRatio: 2,
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    autoSkip: false
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    max: 100
+                                }
+                            }]
+                        },
+                        plugins: {
+                            labels: [
+                                {
+                                    render: 'value',
+                                    fontSize: 0
+                                }
+                            ]
+                        }
+
+                    }
+                });
+
+            });
+
+        </script>
+    }
+
+}

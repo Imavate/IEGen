@@ -1,0 +1,142 @@
+﻿@model IEGen.Models.ClassSkillPageViewModel
+@{
+    ViewBag.Title = Model.Name + " Qualitative Skill Entry";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <b>@Model.Name</b> Qualitative Skill Entry
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <b>Grading Guide:</b> @Model.GradeGuide
+        @using (Ajax.BeginForm("SaveSkillEntry", "Data", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtn', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtn', 'Save Changes', 'AlertDiv', xhr)"
+                                },
+                                new { role = "form" }))
+        {
+            @Html.HiddenFor(m => m.ClassID)
+            @Html.HiddenFor(m => m.MinScore)
+            @Html.HiddenFor(m => m.MaxScore)
+            <table id="csDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>@Model.Skill1</th>
+                        <th>@Model.Skill2</th>
+                        <th>@Model.Skill3</th>
+                        <th>@Model.Skill4</th>
+                        <th>@Model.Skill5</th>
+                        <th>@Model.Skill6</th>
+                    </tr>
+                </thead>
+                <tbody id="csDTBody">
+                    @for (int i = 0; i < Model.Entries.Count; i++)
+                    {
+                    <tr>
+                        <td>@Model.Entries[i].SerialNumber</td>
+                        <td>@Model.Entries[i].DisplayName</td>
+                        <td class="crel">
+                            @Html.HiddenFor(m => m.Entries[i].StudentID)
+                            @Html.HiddenFor(m => m.Entries[i].MinScore)
+                            @Html.HiddenFor(m => m.Entries[i].MaxScore)
+                            <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore1)</span>
+                            @if (i == 0)
+                            {
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore1, new { @class = "form-control ftext", type = "number" })
+                            }
+                            else
+                            {
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore1, new { @class = "form-control", type = "number" })
+                            }
+                        </td>
+                        <td class="crel">
+                            @if (Model.HasSkill2)
+                            {
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore2)</span>
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore2, new { @class = "form-control", type = "number" })
+                            }
+                        </td>
+                        <td class="crel">
+                            @if (Model.HasSkill3)
+                            {
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore3)</span>
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore3, new { @class = "form-control", type = "number" })
+                            }
+                        </td>
+                        <td class="crel">
+                            @if (Model.HasSkill4)
+                            {
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore4)</span>
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore4, new { @class = "form-control", type = "number" })
+                            }
+                        </td>
+                        <td class="crel">
+                            @if (Model.HasSkill5)
+                            {
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore5)</span>
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore5, new { @class = "form-control", type = "number" })
+                            }
+                        </td>
+                        <td class="crel">
+                            @if (Model.HasSkill6)
+                            {
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore6)</span>
+                                @Html.TextBoxFor(m => m.Entries[i].SkillScore6, new { @class = "form-control", type = "number" })
+                            }
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+
+            <button id="SubmitBtn" class="btn btn-success">Verify Entries</button>
+
+            @Html.ActionLink("Go Back", "Skills", null, new { @class = "btn btn-default" })
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $('.ftext:first').focus();
+
+        });
+
+
+    </script>
+}
+
+

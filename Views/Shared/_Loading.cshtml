@@ -1,0 +1,9 @@
+﻿@model string
+@{
+    Layout = null;
+    string divID = (Model == null ? "" : Model) + "Loading";
+}
+<div id="@divID" style="font-size:larger; display:none;">
+    <i class="fa fa-spinner fa-pulse fa-lg fa-fw"></i> <span>Update in Progress...</span>
+</div>
+

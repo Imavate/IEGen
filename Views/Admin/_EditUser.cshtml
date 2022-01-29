@@ -1,0 +1,96 @@
+﻿@model IEGen.Models.EditUserViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Edit User</h4>
+    </div>
+    @using (Ajax.BeginForm("UpdateUser", "Admin", null,
+                                    new AjaxOptions
+                                    {
+                                        OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                        OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr)",
+                                        OnSuccess = "ActionSuccess"
+                                    },
+                                    new { @class = "modal-body form-panel-body", role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(u => u.UserID)
+        @Html.HiddenFor(u => u.OldEmail)
+
+        @Html.LabelFor(m => m.Email, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.Email)</span>
+        <div class="input-group fm-sp">
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", style = "pointer-events:none" })
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" title="Edit Email" onclick="EnableEmailEdit();"><i class="fa fa-pencil-alt"></i></button>
+            </span>
+        </div>
+
+
+        @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.Name)</span>
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control fm-sp" })
+
+        @Html.LabelFor(m => m.PhoneNumber, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.PhoneNumber)</span>
+        @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control fm-sp", type = "tel" })
+
+        <hr />
+
+        @Html.LabelFor(m => m.UserType, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.UserType)</span>
+        @Html.EnumDropDownListFor(m => m.UserType, "-- Select User Type --", new { @class = "form-control fm-sp" })
+
+        @Html.LabelFor(m => m.AccessGroupID, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.AccessGroupID)</span>
+        @Html.DropDownListFor(m => m.AccessGroupID, Model.AccessGroupList, new { @class = "form-control fm-sp" })
+
+        if (Model.CanMerge)
+        {
+            <div class="panel panel-warning">
+                <div class="panel-heading"><h4 class="panel-title">Merge Candidate</h4></div>
+                <div class="form-panel-body">
+                    <label class="fm-sp">The selection was made based on similar Phone Numbers</label> <br />
+                    <label class="fm-sp text-danger">The User with the following details will be deleted after the merge!</label>
+                    <div class="fm-sp"></div>
+
+                    <label class="control-label">Email</label>
+                    <p class="control-static">@Model.Email</p>
+                    <div class="fm-sp"></div>
+
+                    <label class="control-label">Name</label>
+                    <p class="control-static">@Model.MergeName</p>
+                    <div class="fm-sp"></div>
+
+                </div>
+            </div>
+        }
+
+        <input type="submit" id="SubmitBtn" style="display:none" />
+    }
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+        @if (Model.CanMerge)
+        {
+            using (Ajax.BeginForm("MergeUsers", "Admin", new { UserID = Model.UserID, OldUserID = Model.MergeUserID },
+                                    new AjaxOptions
+                                    {
+                                        OnBegin = "AddCog('MergeBtnO', ' Processing...')",
+                                        OnFailure = "RestoreElementShowAlert('MergeBtnO', 'Merge Users', 'MsgDiv', xhr)",
+                                        OnSuccess = "ActionSuccess",
+                                        Confirm = "Do you really want to MERGE the users?"
+                                    },
+                                    new { role = "form", style = "display:none" }))
+            {
+                <input type="submit" id="MergeBtn" />
+            }
+
+            <button id="MergeBtnO" class="btn btn-warning bts" onclick="return document.getElementById('MergeBtn').click();">Merge Users</button>
+        }
+
+        <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Save</button>
+    </div>
+</div>

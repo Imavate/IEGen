@@ -1,0 +1,39 @@
+﻿@model IEGen.Models.SkillGradeViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Add Skill Grade</h4>
+    </div>
+    @using (Ajax.BeginForm("CreateSkillGrade", "Admin", null,
+                            new AjaxOptions
+                            {
+                                OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr)",
+                                OnSuccess = "AddSkillGradeSuccess"
+                            },
+                            new { @class = "modal-body form-panel-body", role = "form" }))
+    {
+        @Html.HiddenFor(g => g.SkillGroupID)
+
+        @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.Name)</span>
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control fm-sp" })
+
+        @Html.LabelFor(m => m.GradeNumber, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.GradeNumber)</span>
+        @Html.TextBoxFor(m => m.GradeNumber, new { @class = "form-control fm-sp", type = "number" })
+
+        @Html.LabelFor(m => m.GradeScore, new { @class = "control-label" })
+        <span class="validation-msg">@Html.ValidationMessageFor(m => m.GradeScore)</span>
+        @Html.TextBoxFor(m => m.GradeScore, new { @class = "form-control fm-sp", type = "number" })
+
+        <input type="submit" id="SubmitBtn" style="display:none" />
+    }
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+        <button id="SubmitBtnO" class="btn btn-success" onclick="return document.getElementById('SubmitBtn').click();">Save</button>
+    </div>
+</div>

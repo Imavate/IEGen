@@ -1,0 +1,88 @@
+﻿@model IEGen.Models.HomeIndexPageViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <b>
+                @if (Model.HeaderViewModel.IsAppAdmin)
+                {
+                    <a href="@Url.Action("Schools", "Admin")" title="View All Schools">@Model.SchoolName</a>
+                }
+                else
+                {
+                    @Model.SchoolName
+                }
+            </b>&nbsp;
+            <span class="pull-right hidden-xs"><a href="@Url.Action("School", "Setup")" title="View All Terms">@Model.TermName</a></span>
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        @if (Model.HeaderViewModel.IsAdmin)
+        {
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="media">
+                    <div class="media-left">
+                        <a href="@Url.Action("Subjects", "Data")" class="btn btn-default" title="Enter Subject Results">
+                            <span class="homebtnspan"><img height="100" width="114" src="~/Content/Images/enter-results.png" /></span>
+                        </a>
+                    </div>
+                    <div class="clearfix" style="padding:5px;"></div>
+                    <div class="media-body">
+                        <h4 class="media-heading">Enter Subject Results</h4>
+                        Enter Results for subjects defined for the current school
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:20px;"></div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="media">
+                    <div class="media-left">
+                        <a href="@Url.Action("Students", "Setup")" class="btn btn-default" title="View Students">
+                            <span class="homebtnspan"><img height="100" width="105" src="~/Content/Images/students.png" /></span>
+                        </a>
+                    </div>
+                    <div class="clearfix" style="padding:5px;"></div>
+                    <div class="media-body">
+                        <h4 class="media-heading">View Students</h4>
+                        View Students in the current school term
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:20px;"></div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="media">
+                    <div class="media-left">
+                        <a href="@Url.Action("Classes", "Setup")" class="btn btn-default" title="View Classes">
+                            <span class="homebtnspan"><img height="100" width="100" src="~/Content/Images/class.png" /></span>
+                        </a>
+                    </div>
+                    <div class="clearfix" style="padding:5px;"></div>
+                    <div class="media-body">
+                        <h4 class="media-heading">View Classes</h4>
+                        View Classes in the current school term
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:20px;"></div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="media">
+                    <div class="media-left">
+                        <a href="@Url.Action("Index", "Report")" class="btn btn-default" title="View Results">
+                            <span class="homebtnspan"><img height="100" width="100" src="~/Content/Images/resultsheet.png" /></span>
+                        </a>
+                    </div>
+                    <div class="clearfix" style="padding:5px;"></div>
+                    <div class="media-body">
+                        <h4 class="media-heading">View Results</h4>
+                        View Results of the current school term
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:20px;"></div>
+            </div>
+        }
+    </div>
+
+</div>

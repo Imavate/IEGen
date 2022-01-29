@@ -1,0 +1,304 @@
+﻿@model IEGen.Models.SchoolDetailsViewModel
+@{
+    ViewBag.Title = "School Setup";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            School Details
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            @if (Model.HeaderViewModel.IsAppAdmin)
+            {
+                @Html.ActionLink("Change School", "Schools", "Admin", null, new { @class = "pull-right titlelink" })
+            }
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Name</label>
+            <p class="control-static">@Model.Name</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Location</label>
+            <p class="control-static">@Model.LocationName</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">Address</label>
+            <p class="control-static">@Model.Address</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth"></div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Type</label>
+            <p class="control-static">@Model.Type</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Email</label>
+            <p class="control-static">@Model.Email</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth visible-sm"></div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Phone</label>
+            <p class="control-static">@Model.Phone</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Status</label>
+            <p class="control-static">@Model.Status</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth"></div>
+        <div class="col-xs-12">
+            <label class="control-label">Write Up</label>
+            <p class="control-static">@Model.WriteUp</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Terms
+            <span class="pull-right hidden-xs">Default: <b id="defSchool">@Model.DefaultTerm</b></span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="stDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="stDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default hidden-xs stAddBtn">Add New</button>
+
+                @Html.ActionLink("View Requests", "SchoolRequests", "Setup", null, new { @class = "btn btn-default hidden-xs" })
+            </div>
+        </div>
+        <table id="stDT" class="table table-hover table-bordered fullwidth" data-order="[[2, &quot;desc&quot;]]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Year-#</th>
+                    <th>Name</th>
+                    <th># Classes</th>
+                    <th># Students</th>
+                    <th>Exam Starts</th>
+                    <th>Vacation</th>
+                    <th>Next Resumption</th>
+                    <th>Days Opened</th>
+                </tr>
+            </thead>
+            <tbody id="stDTBody">
+                @foreach (var ag in Model.Terms)
+                {
+                    <tr id="@ag.TermID">
+                        <td><button class="btn btn-default btn-xs stDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td><button class="btn btn-success btn-xs defBtn" title="set as default"><i class="fa fa-play"></i></button></td>
+                        <td>@ag.TermDef</td>
+                        <td>@ag.Name</td>
+                        <td>@ag.ClassCount</td>
+                        <td>@ag.ResultOrStudentCount</td>
+                        <td>@ag.ExamStartDateStr</td>
+                        <td>@ag.VacationDateStr</td>
+                        <td>@ag.NRDateStr</td>
+                        <td>@ag.DaysOpened</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center">
+            <button type="button" class="btn btn-primary stAddBtn">Add New</button> 
+            @Html.ActionLink("View Requests", "SchoolRequests", "Setup", null, new { @class = "btn btn-default" })
+        </span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#stDT';
+        var editBtn = "<button class='btn btn-default btn-xs stDTBtn' title='edit'><i class='fa fa-pencil-alt'></i></button>";
+        var defBtn = "<button class='btn btn-success btn-xs defBtn' title='set as default'><i class='fa fa-play'></i></button>";
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("stDT");
+
+            var editSchoolUrl = "@Url.Action("_EditSchool", "Admin")";
+            var schoolID = "@Model.HeaderViewModel.SchoolID";
+            $('#EditBtn').click(function () {
+
+                $.ajax({
+                    url: editSchoolUrl,
+                    data: { SchoolID: schoolID },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var addUrl = "@Url.Action("_AddTerm")";
+            $('.stAddBtn').click(function () {
+
+                $.ajax({
+                    url: addUrl,
+                    data: { SchoolID: schoolID },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        InitializeDates();
+                    }
+                });
+            });
+
+            var editUrl = "@Url.Action("_EditTerm")";
+            $(tbID).on("click", '.stDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { TermID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeDates();
+                    }
+                });
+            });
+
+            var defUrl = "@Url.Action("SetDefTerm", new { UserID = Model.HeaderViewModel.UserID, SchoolID = Model.HeaderViewModel.SchoolID })";
+            $(tbID).on("click", '.defBtn', function () {
+
+                $.ajax({
+                    url: defUrl,
+                    data: { TermID: $(this.parentNode.parentNode).attr('id') },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    error: function (xhr, status, error) {
+                        ShowAlertMsg('AlertDiv', xhr);
+                    }
+                });
+            });
+
+
+        });
+
+        function InitializeDates() {
+            InitializeDatePicker("ExamStartDate");
+            InitializeDatePicker("ExamEndDate");
+            InitializeDatePicker("ScoreCollectionDate");
+            InitializeDatePicker("VacationDate");
+            InitializeDatePicker("NextResumptionDate");
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function ActionSuccess(data) {
+
+            RefreshPage();
+        }
+
+        function AddSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, defBtn, ag.TermDef, ag.Name, ag.ClassCount, ag.ResultOrStudentCount, ag.ExamStartDateStr, ag.VacationDateStr, ag.NRDateStr, ag.DaysOpened];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.TermID);
+        }
+
+        function EditTermSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, defBtn, ag.TermDef, ag.Name, ag.ClassCount, ag.ResultOrStudentCount, ag.ExamStartDateStr, ag.VacationDateStr, ag.NRDateStr, ag.DaysOpened];
+
+            $(tbID).DataTable().row('#' + ag.TermID).data(rowData).draw('page');
+        }
+
+        function DeleteTermSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+    </script>
+}
+
+

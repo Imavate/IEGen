@@ -1,0 +1,203 @@
+﻿@model IEGen.Models.SkillPageViewModel
+@{
+    ViewBag.Title = "Qualitative Skills";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Qualitative Skills
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default printBtn">Print Skill Sheets</button>
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Type</th>
+                    <th># Students</th>
+                    <th>Skill Group</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.Classes)
+                {
+                <tr id="@ag.ClassID">
+                    <td>
+                        @if (Model.HeaderViewModel.IsAdmin)
+                        {
+                            <button class="btn btn-default btn-xs clDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button>
+                        }
+                    </td>
+                    <td>
+                        @if (ag.HasSkill)
+                        {
+                            if (ag.VerifySkills)
+                            {
+                                <button class="btn btn-warning btn-xs cvDTBtn" title="skill verification"><i class="fa fa-file-alt"></i></button>
+                            }
+                            else
+                            {
+                                if (ag.HasEntries)
+                                {
+                                    <button class="btn btn-default btn-xs csDTBtn" title="skill entry"><i class="fa fa-file-alt"></i></button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-info btn-xs csDTBtn" title="skill entry"><i class="fa fa-file-alt"></i></button>
+                                }
+                            }
+                        }
+                    </td>
+                    <td>@ag.Name</td>
+                    <td>@ag.Level</td>
+                    <td>@ag.Type</td>
+                    <td>@ag.StudentCount</td>
+                    <td>@ag.SkillGroup</td>
+                    <td>@ag.Status</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+<script type="text/javascript">
+
+        var tbID = '#clDT';
+        $(document).ready(function () {
+
+            MyDTBtnInit("clDT");
+
+            var printUrl = "@Url.Action("SkillSheetsP", "Data", new { TermID = Model.TermID })";
+            $('.printBtn').click(function () {
+                window.open(printUrl, "_blank");
+            });
+
+            var editUrl = "@Url.Action("_EditClass", "Setup", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $(tbID).on("click", '.clDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { ClassID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+
+                         InitializePromotionChange();
+                    }
+                });
+            });
+
+            var entryUrl = "@Url.Action("SkillEntry", new { ClassID = "123" })";
+            $(tbID).on("click", '.csDTBtn', function () {
+
+                window.location = entryUrl.replace("123", $(this.parentNode.parentNode).attr('id'));
+                //window.open(entryUrl.replace("123", $(this.parentNode.parentNode).attr('id')), "_blank");
+            });
+
+            var verifyUrl = "@Url.Action("SkillVerify", new { ClassID = "123" })";
+            $(tbID).on("click", '.cvDTBtn', function () {
+
+                window.location = verifyUrl.replace("123", $(this.parentNode.parentNode).attr('id'));
+            });
+
+        });
+
+        function InitializePromotionChange() {
+
+            $('#PViewContainer').on("change", '#IsPromotionalClass', function () {
+
+                if ($('#IsPromotionalClass').is(':checked')) {
+                    $('.PromotionDiv').show();
+                }
+                else {
+                    $('.PromotionDiv').hide();
+                }
+
+            });
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function EditClassSuccess(data) {
+
+            RefreshPage();
+        }
+
+        function DeleteClassSuccess(rowID) {
+
+            RefreshPage();
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+</script>
+}

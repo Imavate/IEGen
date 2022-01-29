@@ -1,0 +1,57 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="ErrorMaster.master.cs" Inherits="IEGen.ErrorMaster" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>IE Portal - <%: Page.Title %></title>
+
+    <link rel="stylesheet" runat="server" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" runat="server" href="~/Content/Site.css" />
+
+    <link rel="icon" href="~/Content/Images/favicon16.png" sizes="16x16" runat="server">
+    <link rel="icon" href="~/Content/Images/favicon32.png" sizes="32x32" runat="server">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="~/Content/Images/favicon144.png" runat="server">
+    <link rel="apple-touch-icon-precomposed" href="~/Content/Images/favicon152.png" runat="server">
+
+</head>
+<body>
+    <header>
+        <asp:Panel runat="server" BackImageUrl="~/Content/Images/header.png" CssClass="container" BorderStyle="Solid" BorderWidth="1px" BorderColor="#D1D1D1">
+            <div class="logo"><img height="100" width="100" class="img-responsive" runat="server" src="~/Content/Images/IELogo.png" title="Imavate Education" /></div>
+        </asp:Panel>
+    </header>
+
+    <form id="form1" runat="server">
+    <div class="container body-content" style="border:1px solid #D1D1D1; padding:2px;">
+        <asp:ContentPlaceHolder ID="ErrorContent" runat="server">
+        
+        </asp:ContentPlaceHolder>
+    </div>
+    </form>
+
+
+    <footer class="container" style="background:#f0f0f0; border:1px solid #d1d1d1; padding:0px;">
+        <div class="pull-left">
+            <div id="footer">
+                <span>&copy; <%: DateTime.Now.Year %></span>
+                <span><a href="http://www.imavate.com" target="_blank"><b>Imavate Solutions Limited</b></a></span>
+<%--                <span>All Rights Reserved</span>--%>
+            </div>
+        </div>
+        <div class="pull-right hidden-xs" style="margin-top: -4px;">
+            <a href="http://www.imavate-edu.com" target="_blank"><img runat="server" height="34" width="140" src="~/Content/Images/footer_logo.png" title="Imavate Education" /></a>
+        </div>
+    </footer>
+    
+
+    <script defer src="<%= ResolveUrl("~/Scripts/fontawesome/fa-solid.min.js") %>"></script>
+<%--    <script defer src="~/Scripts/fontawesome/fa-regular.min.js"></script>--%>
+    <script src="<%= ResolveUrl("~/Scripts/fontawesome/fontawesome.min.js") %>"></script>
+
+</body>
+</html>

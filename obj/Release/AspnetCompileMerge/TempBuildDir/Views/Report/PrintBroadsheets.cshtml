@@ -1,0 +1,43 @@
+﻿@model IEGen.Models.BroadsheetPageViewModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Broadsheet - " + Model.Name;
+
+    var cnt = 0;
+}
+
+<div class="defprint">
+    
+    @foreach (var bs in Model.Broadsheets)
+    {
+        if (cnt > 0)
+        {
+            <div style="page-break-before: always;"></div>
+        }
+
+        Html.RenderPartial("_Broadsheet", bs);
+        cnt++;
+    }
+
+    @foreach (var bs in Model.GradeBroadsheets)
+    {
+        if (cnt > 0)
+        {
+            <div style="page-break-before: always;"></div>
+        }
+
+        Html.RenderPartial("_GradeBroadsheet", bs);
+        cnt++;
+    }
+
+    @foreach (var bs in Model.FullBroadsheets)
+    {
+        if (cnt > 0)
+        {
+            <div style="page-break-before: always;"></div>
+        }
+
+        Html.RenderPartial("_FullBroadsheet", bs);
+        cnt++;
+    }
+</div>

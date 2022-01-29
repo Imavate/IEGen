@@ -1,0 +1,108 @@
+﻿@model IEGen.Models.EditFloatingStudentViewModel
+@{
+    var oldPicStyle = Model.NoPicture ? "display:none" : "";
+    var newPicStyle = Model.NoPicture ? "" : "display:none";
+}
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Edit Student: @Model.DisplayName</h4>
+    </div>
+    <form id="UpdateForm" class="modal-body form-panel-body row" role="form">
+        @Html.HiddenFor(m => m.StudentID)
+        @Html.HiddenFor(m => m.GuidString)
+
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.FirstName, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.FirstName)</span>
+            @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control fm-sp" })
+        </div>
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.OtherName, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.OtherName)</span>
+            @Html.TextBoxFor(m => m.OtherName, new { @class = "form-control fm-sp" })
+        </div>
+
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.Surname, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Surname)</span>
+            @Html.TextBoxFor(m => m.Surname, new { @class = "form-control fm-sp" })
+        </div>
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.Sex, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Sex)</span>
+            @Html.EnumDropDownListFor(m => m.Sex, "-- Select Sex --", new { @class = "form-control fm-sp" })
+        </div>
+
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.BirthDate, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.BirthDate)</span>
+            @Html.TextBoxFor(m => m.BirthDate, "{0:MM/dd/yyyy}", new { @class = "form-control fm-sp" })
+        </div>
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.LocationID, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.LocationID)</span>
+            @Html.DropDownListFor(m => m.LocationID, Model.LocationList, "-- Select Location --", new { @class = "form-control fm-sp" })
+        </div>
+
+        <div class="col-sm-6 classdiv">
+            <label class="control-label">Class</label>
+            <p class="control-static">Floating</p>
+        </div>
+        <div class="col-sm-6 classdiv" style="display:none">
+            <label class="control-label">Class | @Model.DefTermName</label>
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.ClassID)</span>
+            @Html.DropDownListFor(m => m.ClassID, Model.ClassList, "-- Select Class --", new { @class = "form-control fm-sp" })
+        </div>
+        <div class="col-sm-6">
+            @Html.LabelFor(m => m.StudentCode, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.StudentCode)</span>
+            @Html.TextBoxFor(m => m.StudentCode, new { @class = "form-control fm-sp" })
+        </div>
+
+        <div class="col-xs-12" style="@oldPicStyle">
+            <p><img height="120" width="120" class="img-responsive" src="@Model.PhotoSrc" title="@Model.DisplayName" /></p>
+            <button type="button" class="btn btn-default Pic" onclick="$('.Pic').toggle();">Change Photo</button>
+            <div class="fm-sp"></div>
+        </div>
+
+        <div class="col-xs-12 Pic" style="@newPicStyle">
+            @Html.LabelFor(m => m.Photo, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Photo)</span>
+            @Html.TextBoxFor(m => m.Photo, new { @class = "form-control fm-sp", type = "file" })
+        </div>
+
+        <input type="submit" id="SubmitBtn" style="display:none" />
+
+    </form>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+        @if (Model.CanDelete)
+        {
+            using (Ajax.BeginForm("DeleteStudent", "Setup", new { StudentID = Model.StudentID, DisplayName = Model.DisplayName },
+                                    new AjaxOptions
+                                    {
+                                        OnBegin = "AddCog('DeleteBtnO', ' Processing...')",
+                                        OnFailure = "RestoreElementShowAlert('DeleteBtnO', 'Delete', 'MsgDiv', xhr)",
+                                        OnSuccess = "ActionSuccess",
+                                        Confirm = "Do you really want to delete this Student?"
+                                    },
+                                    new { role = "form", style = "display:none" }))
+            {
+                <input type="submit" id="DeleteBtn" />
+            }
+
+            <button id="DeleteBtnO" class="btn btn-warning bts" onclick="return document.getElementById('DeleteBtn').click();">Delete</button>
+        }
+
+        <button id="ChangeClassBtnO" class="btn btn-info bts" onclick="$('.classdiv').toggle();">Set Class</button>
+
+        @*<button id="SubmitBtnO" class="btn btn-success bts" onclick="UpdateStudent()">Save Changes</button>*@
+        <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Save Changes</button>
+    </div>
+</div>
+
+
+

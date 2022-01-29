@@ -1,0 +1,155 @@
+﻿@model IEGen.Models.EditCTeacherViewModel
+
+@{
+    ViewBag.Title = "Teacher Registration";
+}
+
+@{
+    Layout = "~/Views/Shared/_WebLayout.cshtml";
+}
+
+<div class="panel panel-primary ext-page">
+    <div class="panel-heading"><h4 class="panel-title">Create New Teacher Profile</h4></div>
+    <div class="panel-body">
+        <form id="RequestForm" class="row" style="padding-bottom:20px; margin-bottom: 20px; border-bottom: 1px solid blue;">
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Name)</span>
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Phone, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Phone)</span>
+                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Email, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Email)</span>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Sex, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Sex)</span>
+                @Html.EnumDropDownListFor(m => m.Sex, "-- Select Sex --", new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.SchoolName, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.SchoolName)</span>
+                @Html.TextBoxFor(m => m.SchoolName, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.SchoolType, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.SchoolType)</span>
+                @Html.EnumDropDownListFor(m => m.SchoolType, "-- Select School Type --", new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.SchoolAddress, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.SchoolAddress)</span>
+                @Html.TextAreaFor(m => m.SchoolAddress, 3, 50, new { @class = "form-control fm-sp" })
+            </div>
+            <div class="col-md-6">
+                @Html.LabelFor(m => m.Subjects, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Subjects)</span>
+                @Html.TextBoxFor(m => m.Subjects, new { @class = "form-control fm-sp", @placeholder = "e.g. English (JS1-3), Literature (SS1)" })
+
+                @Html.LabelFor(m => m.Designation, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Designation)</span>
+                @Html.TextBoxFor(m => m.Designation, new { @class = "form-control fm-sp", @placeholder = "e.g. Class Teacher (JSS 1A), H.O.D Mathematics" })
+
+                @Html.LabelFor(m => m.MaxDegree, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.MaxDegree)</span>
+                @Html.EnumDropDownListFor(m => m.MaxDegree, "-- Select Degree --", new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Qualifications, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Qualifications)</span>
+                @Html.TextBoxFor(m => m.Qualifications, new { @class = "form-control fm-sp", @placeholder = "e.g. NCE (2007), B.Ed. (2012)" })
+
+                @Html.LabelFor(m => m.StartYear, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.StartYear)</span>
+                @Html.TextBoxFor(m => m.StartYear, new { @class = "form-control fm-sp" })
+
+                <div style="padding:20px 0;">
+                    <div class="g-recaptcha" data-sitekey="@ViewBag.SiteKey"></div>
+                </div>
+
+                <div id="MsgDiv"></div>
+
+                <button id="SubmitBtnO" class="btn btn-success btn-lg">Submit Request</button>
+            </div>
+        </form>
+
+        <div class="row">
+            <div class="col-md-6">
+
+                <div id="SuccessDiv"></div>
+
+                <div id="InfoDiv" class="hidden-xs hidden-sm">
+                    <h4>Benefits for teachers include:</h4>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item"> Career Authenticity: Improves teachers' professional standing among colleagues in other professions </a>
+                        <a href="#" class="list-group-item"> Improves the image of the school and the teaching profession in general which leads to better public perception </a>
+                        <a href="#" class="list-group-item"> Access to subject results anywhere creates a data friendly culture that fosters collaboration which leads to better solutions </a>
+                        <a href="#" class="list-group-item"> Access to in-depth analysis of performances in various subjects across various categories </a>
+                        <a href="#" class="list-group-item"> Removes the stress of creating broadsheets and other student reports at the end of the term </a>
+                        <a href="#" class="list-group-item"> Access to various categories of performance based awards for teachers </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="well">
+                    <img alt="Business Card" src="@Url.Content("~/Content/Images/Award-Business-Card-back.png")" class="img-responsive" style="padding-bottom:20px;" />
+                    <img alt="Business Card" src="@Url.Content("~/Content/Images/Award-Business-Card-front.png")" class="img-responsive" />
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section headscripts
+{
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var createUrl = '@Url.Action("SubmitNewTeacher")';
+            var options = {
+                type: "POST",
+                url: createUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(xhr);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#RequestForm').ajaxForm(options);
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function ActionSuccess(xhr) {
+
+            $('#RequestForm').hide();
+            $('#InfoDiv').removeClass('hidden-sm hidden-xs');
+
+            ShowAlertMsg('SuccessDiv', xhr);
+        }
+
+    </script>
+}

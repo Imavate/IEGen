@@ -1,0 +1,159 @@
+﻿@model IEGen.Models.SchoolReportPageViewModel
+@{
+    ViewBag.Title = "School Reports";
+}
+
+<div id="AlertDiv"></div>
+
+@if (Model.ShouldAnalyze)
+{
+    <div class="alert alert-info alert-dismissable" role="alert" style="display:none; margin-bottom:5px;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button id="AnalyzeBtn" class="btn btn-default alertBtn">Click here</button> <b> to run School Performance Analysis</b>
+    </div>
+}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                School Reports
+
+                <span class="pull-right hidden-xs" style="font-weight:bold">
+                    @if (Model.HeaderViewModel.IsAdmin)
+                    {
+                        <a href="@Url.Action("Schools", "Admin")" title="Change Term">@Model.SchoolName</a>
+                    }
+                    else
+                    {
+                        @Model.SchoolName
+                    }
+                </span>
+            </div>
+        </div>
+        <div class="form-panel-body row">
+            <div class="col-xs-6">
+                <label class="control-label">School</label>
+                <p class="control-static">@Model.SchoolName</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-6 col-md-3">
+                <label class="control-label">Type</label>
+                <p class="control-static" id="pName">@Model.TypeName</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-2 col-md-1">
+                <label class="control-label">#</label>
+                <p class="control-static">@Model.ResultCount</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-4 col-md-2">
+                <label class="control-label">Mean Avg.</label>
+                <p class="control-static">@Model.MeanAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+        </div>
+        @if (Model.HasResults)
+        {
+            <hr class="sp-b0 sp-t0" />
+            <div class="form-panel-body sp-b5">
+                <button id="PrintAllBtn" class="btn btn-default"><i class="fa fa-print"></i> Print All Class Type Reports</button>
+            </div>
+        }
+    </div>
+
+@if (Model.HasResults)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title">Class Type Performance</h4></div>
+        <div class="wide-panel-body">
+            <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+                <thead>
+                    <tr>
+                        <th data-orderable="false" data-searchable="false"></th>
+                        <th>Level</th>
+                        <th>Type</th>
+                        <th># Classes</th>
+                        <th># Pupils</th>
+                        <th>Cur. Avg.</th>
+                        <th>Low. Avg.</th>
+                        <th>Mean Avg.</th>
+                        <th>Best Avg.</th>
+                    </tr>
+                </thead>
+                <tbody id="clDTBody">
+                    @foreach (var ag in Model.Stats)
+                    {
+                    <tr id="@ag.ClassLevelID">
+                        <td><button class="btn btn-default btn-xs cpDTBtn" id="@ag.ClassTypeID" title="print report"><i class="fa fa-chart-bar text-primary"></i></button></td>
+                        <td>@ag.LevelName</td>
+                        <td>@ag.TypeName</td>
+                        <td>@ag.ClassCount</td>
+                        <td>@ag.ResultCount</td>
+                        <td>@ag.CurAvgStr</td>
+                        <td>@ag.LowAvgStr</td>
+                        <td>@ag.MeanAvgStr</td>
+                        <td>@ag.BestAvgStr</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var userid = "@Model.HeaderViewModel.UserID";
+
+        $(document).ready(function () {
+
+            $('.alert').show(500);
+
+            var analyzeUrl = "@Url.Action("AnalyzeSchool", "Report", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('#AnalyzeBtn').click(function () {
+                $.ajax({
+                    url: analyzeUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    success: function (r) {
+                        RefreshPage();
+                    }
+                });
+            });
+
+            var printAllUrl = "@Url.Action("PrintClassTypeReports", "Report", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('#PrintAllBtn').click(function () {
+                window.open(printAllUrl, '_blank');
+            });
+
+            var ctUrl = "@Url.Action("PrintClassTypeReport", "Report", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('#clDT').on("click", '.cpDTBtn', function () {
+                //window.open(ctUrl.replace("123", $(this).attr('id')).replace("456", $(this.parentNode.parentNode).attr('id')), '_blank');
+                window.open(ctUrl + "?ClassTypeID=" + $(this).attr('id') + "&LevelID=" + $(this.parentNode.parentNode).attr('id'), '_blank');
+            });
+
+
+        });
+    </script>
+}

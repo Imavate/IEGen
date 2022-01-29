@@ -1,0 +1,70 @@
+﻿@model IEGen.Models.ImportTermStudentsViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Import Students</h4>
+    </div>
+    <div id="BodyDiv">
+        @using (Ajax.BeginForm("FinishImportStudents", "Setup", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                    OnFailure = "ProcessVerifyError(xhr, status, error)"
+                                },
+                                new { @class = "modal-body form-panel-body", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.NewTermID)
+
+            <label class="control-label">Source Term</label>
+            <p class="control-static">@Model.Name</p>
+            <div class="fm-sp"></div>
+
+            <label class="control-label">Destination Term</label>
+            <p class="control-static">@Model.NewTermName</p>
+            <div class="fm-sp"></div>
+
+            <div class="fm-sp pad-t5">
+                <div class="checkbox cb-btm5">
+                    <label>@Html.CheckBoxFor(m => m.ImportAllStudents) Import All Students?</label>
+                </div>
+            </div>
+
+            <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25">
+                <thead>
+                    <tr>
+                        <th>Old Class</th>
+                        <th>Type</th>
+                        <th># Students</th>
+                        <th>New Class</th>
+                    </tr>
+                </thead>
+                <tbody id="clDTBody">
+                    @for (int i = 0; i < Model.Classes.Count; i++)
+                    {
+                        @Html.HiddenFor(m => m.Classes[i].ClassID)
+                        var pm = Model.Classes[i];
+                        <tr>
+                            <td>@pm.Name</td>
+                            <td>@pm.Type</td>
+                            <td>@pm.StudentCount</td>
+                            <td>
+                                @Html.DropDownListFor(m => m.Classes[i].NewClassID, Model.NewClassList, "-- Select New Class --", new { @class = "form-control" })
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <input type="submit" id="SubmitBtn" style="display:none" />
+        }
+
+        <div class="modal-footer">
+            <div id="MsgDiv"></div>
+            <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+            <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Import Students</button>
+
+        </div>
+    </div>
+</div>

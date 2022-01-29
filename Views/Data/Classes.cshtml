@@ -1,0 +1,296 @@
+﻿@model IEGen.Models.ClassScoreEntryPageViewModel
+@{
+    ViewBag.Title = "Class Score Entries";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Class Score Entries
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <button type="button" class="btn btn-default delete">Delete Scores</button>
+                }
+
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Type</th>
+                    <th># Students</th>
+                    <th># Subjects</th>
+                    <th>CA</th>
+                    <th>Exam</th>
+                    <th># Verified</th>
+                    <th>Latest Verification</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.Classes)
+                {
+                    <tr id="@ag.ClassID">
+                        <td><button class="btn btn-default btn-xs eDTBtn" title="edit class details"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td><button class="btn btn-primary btn-xs seDTBtn" title="upload class scores"><i class="fa fa-file-alt"></i></button></td>
+                        <td>@ag.Name</td>
+                        <td>@ag.Level</td>
+                        <td>@ag.Type</td>
+                        <td>@ag.StudentCount</td>
+                        <td>@ag.SubjectCount</td>
+                        <td>@ag.CAWeight</td>
+                        <td>@ag.ExamWeight</td>
+                        <td>@ag.VerifiedCount</td>
+                        <td>@ag.TimeVerifiedN</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#clDT';
+        $(document).ready(function () {
+
+            MyDTBtnInit("clDT");
+
+            var editUrl = "@Url.Action("_EditClass", "Setup", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $(tbID).on("click", '.eDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { ClassID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+
+                         InitializePromotionChange();
+                    }
+                });
+            });
+
+            var uploadUrl = "@Url.Action("_UploadClassScores", "Data", new { UserID = Model.HeaderViewModel.UserID })";
+            $(tbID).on("click", '.seDTBtn', function () {
+
+                 $.ajax({
+                     url: uploadUrl,
+                     data: { ClassID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeUpload();
+                     }
+                 });
+            });
+
+            var deleteUrl = "@Url.Action("_DeleteScores", "Data", new { TermID = Model.TermID})";
+            $('.delete').click(function () {
+
+                $.ajax({
+                    url: deleteUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        InitializeDeleteScores();
+                    }
+                });
+
+            });
+
+        });
+
+        function InitializePromotionChange() {
+
+            $('#PViewContainer').on("change", '#IsPromotionalClass', function () {
+
+                if ($('#IsPromotionalClass').is(':checked')) {
+                    $('.PromotionDiv').show();
+                }
+                else {
+                    $('.PromotionDiv').hide();
+                }
+
+            });
+        }
+
+        function ShowModal(content) {
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal() {
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function EditClassSuccess(data) {
+
+            RefreshPage();
+        }
+
+        function DeleteClassSuccess(rowID) {
+
+            RefreshPage();
+        }
+
+        var finishUploadUrl = '@Url.Action("UploadClassScores")';
+        function InitializeUpload() {
+
+            var options = {
+                type: "POST",
+                url: finishUploadUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Upload Scores', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    UploadSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UploadForm').ajaxForm(options);
+        }
+
+        var editBtn = "<button class='btn btn-default btn-xs eDTBtn' title='edit class details'><i class='fa fa-pencil-alt'></i></button>";
+        var uploadBtn = "<button class='btn btn-primary btn-xs seDTBtn' title='upload class scores'><i class='fa fa-file-alt'></i></button>";
+        function UploadSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, uploadBtn, ag.Name, ag.Level, ag.Type, ag.StudentCount, ag.SubjectCount, ag.CAWeight, ag.ExamWeight, ag.VerifiedCount, ag.TimeVerifiedN];
+
+            $(tbID).DataTable().row('#' + ag.ClassID).data(rowData).draw('page');
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+
+        var deleteRearrangeUrl = "@Url.Action("DeleteRearrangeScores", new { TermID = Model.TermID })";
+        var deleteScoresUrl = "@Url.Action("DeleteScores", new { TermID = Model.TermID })";
+        function InitializeDeleteScores() {
+
+            $('#DeleteBtn').click(function () {
+
+                if (window.confirm('Do you want to DELETE ALL SCORES for all Subjects in ALL Classes?')) {
+                    $.post({
+                        url: deleteScoresUrl,
+                        data: {},
+                        global: false,
+                        dataType: "json",
+                        beforeSend: function () {
+                            AddCog('DeleteBtn', 'Processing...');
+                        },
+                        success: function (r) {
+                            RefreshPage();
+                        },
+                        error: function (xhr) {
+                            RestoreElementShowAlert('DeleteBtn', 'Delete Only', 'MsgDiv', xhr);
+                        }
+                    });
+                }
+            });
+
+            $('#DeleteRearrangeBtn').click(function () {
+
+                if (window.confirm('Do you want to DELETE ALL SCORES and REARRANGE the students for all Subjects in ALL Classes?')) {
+                    $.post({
+                        url: deleteRearrangeUrl,
+                        data: {},
+                        global: false,
+                        dataType: "json",
+                        beforeSend: function () {
+                            AddCog('DeleteRearrangeBtn', 'Processing...');
+                        },
+                        success: function (r) {
+                            RefreshPage();
+                        },
+                        error: function (xhr) {
+                            RestoreElementShowAlert('DeleteRearrangeBtn', 'Delete and Rearrange', 'MsgDiv', xhr);
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

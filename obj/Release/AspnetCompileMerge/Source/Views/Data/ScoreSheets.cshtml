@@ -1,0 +1,129 @@
+﻿@model IEGen.Models.ScoreSheetsPageViewModel
+@{
+    ViewBag.Title = "Class Score Sheets";
+}
+
+<div id="AlertDiv"></div>
+
+@if (Model.HasScores)
+{
+    <div class="alert alert-warning alert-dismissable" role="alert" style="display:none; margin-bottom:5px;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        Scores have been entered for this Term. Please verify that you are in the right Term!
+    </div>
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Class Score Sheets
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Type</th>
+                    <th># Students</th>
+                    <th># Subjects</th>
+                    <th>CA</th>
+                    <th>Exam</th>
+                    <th>Grade Group</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.Classes)
+                {
+                    <tr id="@ag.ClassID">
+                        <td><button class="btn btn-default btn-xs csDTBtn" title="print score sheet"><i class="fa fa-print"></i></button></td>
+                        <td><button class="btn btn-success btn-xs seDTBtn" title="download excel score sheet file"><i class="fa fa-file-excel"></i></button></td>
+                        <td><button class="btn btn-warning btn-xs szDTBtn" title="download compressed excel score sheets"><i class="fa fa-file-archive"></i></button></td>
+                        <td>@ag.Name</td>
+                        <td>@ag.Level</td>
+                        <td>@ag.Type</td>
+                        <td>@ag.StudentCount</td>
+                        <td>@ag.SubjectCount</td>
+                        <td>@ag.CAWeight</td>
+                        <td>@ag.ExamWeight</td>
+                        <td>@ag.GradeGroupName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#clDT';
+        $(document).ready(function () {
+
+            $('.alert').show(500);
+
+            MyDTBtnInit("clDT");
+
+            var printUrl = "@Url.Action("ScoreSheetsP", new { ClassID = "123" })";
+            $(tbID).on("click", '.csDTBtn', function () {
+
+                window.open(printUrl.replace("123", $(this.parentNode.parentNode).attr('id')), "_blank");
+            });
+
+            var excelUrl = "@Url.Action("ScoreSheetsE", new { ClassID = "123" })";
+            $(tbID).on("click", '.seDTBtn', function () {
+
+                window.location = excelUrl.replace("123", $(this.parentNode.parentNode).attr('id'));
+            });
+
+            var zipUrl = "@Url.Action("ScoreSheetsZip", new { ClassID = "123" })";
+            $(tbID).on("click", '.szDTBtn', function () {
+
+                window.location = zipUrl.replace("123", $(this.parentNode.parentNode).attr('id'));
+            });
+
+        });
+    </script>
+}

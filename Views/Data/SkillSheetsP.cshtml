@@ -1,0 +1,73 @@
+﻿@model IEGen.Models.SkillSheetsPageViewModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Qualitative Skill Sheets - " + Model.SchoolName;
+
+    var cnt = 0;
+} 
+
+@foreach (var sh in Model.DisplaySheets)
+{
+    if (cnt > 0)
+    {
+        <div style="page-break-before: always;"></div>
+    }
+
+    var thClass = sh.MaxNameLength > 25 ? "font-13" : "";
+
+    <div class="panel panel-default" style="font-size: 14px; margin-bottom:0">
+        <div class="panel-heading">
+            <div class="panel-title" style="font-size:larger">
+                <b>@sh.Name</b> Qualitative Skill Entry
+
+                <span class="pull-right">@Model.TermName</span>
+            </div>
+        </div>
+        <div class="form-panel-body row">
+            <div class="col-xs-6">
+                <label class="control-label">School:</label>
+                <p class="control-static">@Model.SchoolName</p>
+            </div>
+            <div class="col-xs-6">
+                <label class="control-label">Grading Guide:</label>
+                <p class="control-static">@sh.GradeGuide</p>
+            </div>
+        </div>
+        <div class="wide-panel-body" style="padding-bottom:0">
+            <table class="table table-bordered fullwidth tbbold" style="margin-bottom:0">
+                <thead>
+                    <tr>
+                        <th>SN</th>
+                        <th>Student</th>
+                        <th class="skillth @thClass">@sh.Skill1</th>
+                        <th class="skillth @thClass">@sh.Skill2</th>
+                        <th class="skillth @thClass">@sh.Skill3</th>
+                        <th class="skillth @thClass">@sh.Skill4</th>
+                        <th class="skillth @thClass">@sh.Skill5</th>
+                        <th class="skillth @thClass">@sh.Skill6</th>
+                    </tr>
+                </thead>
+                <tbody id="clDTBody">
+                    @foreach (var ag in sh.Entries)
+                    {
+                    <tr>
+                        <td>@ag.SerialNumber</td>
+                        <td><b>@ag.StudentName</b></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <span>&copy; @DateTime.Now.Year Imavate Education</span><span class="pull-right">www.imavate-edu.com</span>
+
+    cnt++;
+}
+
+

@@ -1,0 +1,94 @@
+﻿@model IEGen.Models.EditGroupRolesViewModel
+
+<div class="modal-body form-panel-body">
+    <label class="control-label">Name</label>
+    <p class="control-static">@Model.Name</p>
+    <div class="fm-sp"></div>
+
+    <label class="control-label"># Users</label>
+    <p class="control-static">@Model.UserCount</p>
+    <div class="fm-sp"></div>
+
+    <div class="panel panel-info">
+        <div class="panel-heading"><h4 class="panel-title">Assigned Roles</h4></div>
+        <div class="wide-panel-body">
+            <div class="row">
+                <div class="col-sm-7">
+                    <div class="input-group">
+                        <input type="search" id="asrDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                        <span class="input-group-btn">
+                            <button id="asrDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                                <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <table id="asrDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-length-menu="[5]">
+                <thead>
+                    <tr>
+                        <th data-orderable="false" data-searchable="false"></th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="asrDTBody">
+                    @foreach (var asr in Model.AssignedRoles)
+                    {
+                        <tr id="@asr.RoleID">
+                            <td><button class="btn btn-danger btn-xs asrDTBtn dtb" data-id="@asr.RoleID" data-grpid="@Model.AccessGroupID"><i class="fa fa-times"></i></button></td>
+                            <td>@asr.Name</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel panel-success">
+        <div class="panel-heading"><h4 class="panel-title">Available Roles</h4></div>
+        <div class="wide-panel-body">
+            <div class="row">
+                <div class="col-sm-7">
+                    <div class="input-group">
+                        <input type="search" id="avrDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                        <span class="input-group-btn">
+                            <button id="avrDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                                <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <table id="avrDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-length-menu="[5]">
+                <thead>
+                    <tr>
+                        <th data-orderable="false" data-searchable="false"></th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody id="avrDTBody">
+                    @foreach (var avr in Model.AvailableRoles)
+                    {
+                        <tr id="@avr.RoleID">
+                            <td><button class="btn btn-success btn-xs avrDTBtn dtb" data-id="@avr.RoleID" data-grpid="@Model.AccessGroupID"><i class="fa fa-plus"></i></button></td>
+                            <td>@avr.Name</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <div id="MsgDiv"></div>
+    @using (Ajax.BeginForm("FinishEditRoles", "Admin", new { AccessGroupID = Model.AccessGroupID },
+                                    new AjaxOptions
+                                    {
+                                        OnBegin = "AddCog('FinishBtn', ' Finishing...')",
+                                        OnFailure = "RestoreElementShowAlert('FinishBtn', 'Finish', 'MsgDiv', xhr)",
+                                        OnSuccess = "EditSuccess"
+                                    },
+                                    new { role = "form" }))
+    {
+        <button type="submit" id="FinishBtn" class="btn btn-success">Finish</button>
+    }
+</div>

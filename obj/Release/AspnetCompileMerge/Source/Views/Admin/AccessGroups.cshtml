@@ -1,0 +1,251 @@
+﻿@model IEGen.Models.AccessGroupPageViewModel
+@{
+    ViewBag.Title = "User Access Control";
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">User Access Groups</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="agDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="agDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default hidden-xs agAddBtn">Add New</button>
+            </div>
+        </div>
+        <table id="agDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th># Users</th>
+                    <th># Roles</th>
+                    <th>Changed By</th>
+                    <th>Time Changed</th>
+                </tr>
+            </thead>
+            <tbody id="agDTBody">
+                @foreach (var ag in Model.AccessGroupList)
+                {
+                    <tr id="@ag.AccessGroupID">
+                        <td><button class="btn btn-default btn-xs agDTBtn dtb" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td>@ag.Name</td>
+                        <td>@ag.UserCount</td>
+                        <td>@ag.RoleCount</td>
+                        <td>@ag.ChangedByName</td>
+                        <td>@ag.TimeChangedStr</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center"><button type="button" class="btn btn-primary agAddBtn">Add New</button></span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#agDT';
+        var editBtn = "<button class='btn btn-default btn-xs agDTBtn' title='edit'><i class='fa fa-pencil-alt'></i></button>";
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("agDT");
+
+            var addGroupUrl = "@Url.Action("_AddAccessGroup")";
+            $('.agAddBtn').click(function () {
+
+                $.ajax({
+                    url: addGroupUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var editGroupUrl = "@Url.Action("_EditAccessGroup")";
+            $(tbID).on("click", '.agDTBtn', function () {
+
+                $.ajax({
+                    url: editGroupUrl,
+                    data: { AccessGroupID: $(this.parentNode.parentNode).attr('id') },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            InitializeEditRoles();
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function AddSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Name, ag.UserCount, ag.RoleCount, ag.ChangedByName, ag.TimeChangedStr];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.AccessGroupID);
+        }
+
+        function EditSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Name, ag.UserCount, ag.RoleCount, ag.ChangedByName, ag.TimeChangedStr];
+
+            $(tbID).DataTable().row('#' + ag.AccessGroupID).data(rowData).draw('page');
+        }
+
+        function DeleteSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+        }
+
+        var editGroupRolesUrl = "@Url.Action("_EditGroupRoles")";
+        var addRoleUrl = "@Url.Action("_AddRole")";
+        var removeRoleUrl = "@Url.Action("_RemoveRole")";
+        function InitializeEditRoles() {
+            $('#PViewContainer').on("click", '.editRoles', function () {
+
+                $.ajax({
+                    url: editGroupRolesUrl,
+                    data: { AccessGroupID: $(this).data('id') },
+                    global: false,
+                    beforeSend: function () {
+                        AddCog('EditRolesBtn', ' Opening');
+                    },
+                    success: function (r) {
+                        $('#BodyDiv').html(r);
+                        MyDTInit("asrDT");
+                        MyDTInit("avrDT");
+                    }
+                });
+            });
+
+            $('#PViewContainer').on("click", '.avrDTBtn', function () {
+
+                $.ajax({
+                    url: addRoleUrl,
+                    data: { RoleID: $(this).data('id'), AccessGroupID: $(this).data('grpid') },
+                    global: false,
+                    beforeSend: function () {
+                        $('#avrDT').DataTable().processing(true);
+                    },
+                    error: function (r) {
+                        $('#avrDT').DataTable().processing(false);
+                        alert('An Error Occured with adding the role!');
+                    },
+                    success: function (r) {
+                        $('#avrDT').DataTable().processing(false);
+                        AddRoleSuccess(r);
+                    }
+                });
+            });
+
+            $('#PViewContainer').on("click", '.asrDTBtn', function () {
+
+                $.ajax({
+                    url: removeRoleUrl,
+                    data: { RoleID: $(this).data('id'), AccessGroupID: $(this).data('grpid') },
+                    global: false,
+                    beforeSend: function () {
+                        $('#asrDT').DataTable().processing(true);
+                    },
+                    error: function (r) {
+                        $('#asrDT').DataTable().processing(false);
+                        alert('An Error Occured with removing the role!');
+                    },
+                    success: function (r) {
+                        $('#asrDT').DataTable().processing(false);
+                        RemoveRoleSuccess(r);
+                    }
+                });
+            });
+        }
+
+        function AddRoleSuccess(data) {
+            var ag = data;
+
+            var rowData = ["<button class='btn btn-danger btn-xs asrDTBtn' data-id=" + ag.RoleID + " data-grpid=" + ag.AccessGroupID + "><i class='fa fa-times'></i></button>",
+                           ag.Name];
+
+            var tr = $('#asrDT').DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.RoleID);
+
+            $('#avrDT').DataTable().row('#' + ag.RoleID).remove().draw();
+        }
+
+        function RemoveRoleSuccess(data) {
+            var ag = data;
+
+            var rowData = ["<button class='btn btn-success btn-xs avrDTBtn' data-id=" + ag.RoleID + " data-grpid=" + ag.AccessGroupID + "><i class='fa fa-plus'></i></button>",
+                           ag.Name];
+
+            var tr = $('#avrDT').DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.RoleID);
+
+            $('#asrDT').DataTable().row('#' + ag.RoleID).remove().draw();
+        }
+    </script>
+}
+
+

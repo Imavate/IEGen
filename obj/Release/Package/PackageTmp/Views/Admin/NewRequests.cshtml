@@ -1,0 +1,237 @@
+﻿@model IEGen.Models.NewRequestPageViewModel
+@{
+    ViewBag.Title = "New School Requests";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">New School Requests</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="ptDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="ptDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <table id="ptDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Date</th>
+                    <th>School</th>
+                    <th>Contact</th>
+                    <th>Type</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+            </thead>
+            <tbody id="ptDTBody">
+                @foreach (var ag in Model.RequestList)
+                {
+                    <tr id="@ag.SchoolRegID">
+                        <td><button class="btn btn-default btn-xs vDTBtn" title="view"><i class="fa fa-search"></i></button></td>
+                        <td><button class="btn btn-success btn-xs cDTBtn" title="create school from request"><i class="fa fa-school"></i></button></td>
+                        <td>@ag.RequestDateStr</td>
+                        <td>@ag.Name</td>
+                        <td>@ag.ContactPerson</td>
+                        <td>@ag.Type</td>
+                        <td>@ag.Email</td>
+                        <td>@ag.Phone</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#ptDT';
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("ptDT");
+
+            var viewUrl = "@Url.Action("_ViewNewRequest")";
+            $(tbID).on("click", '.vDTBtn', function () {
+
+                var schRegID = $(this.parentNode.parentNode).attr('id');
+                 $.ajax({
+                     url: viewUrl,
+                     data: { SchoolRegID: schRegID },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+
+                         InitializeSelectSchool(schRegID);
+                    }
+                });
+            });
+
+            var sfrUrl = "@Url.Action("_SchoolFromRequest")";
+            $(tbID).on("click", '.cDTBtn', function () {
+
+                var schRegID = $(this.parentNode.parentNode).attr('id');
+                 $.ajax({
+                     url: sfrUrl,
+                     data: { SchoolRegID: schRegID },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeCreateFromRequest(schRegID);
+                    }
+                });
+            });
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        var selectUrl = "@Url.Action("_SelectSchool")";
+        function InitializeSelectSchool(SchoolRegID) {
+
+            $('#PViewContainer').on("click", '#AddToSchoolBtn', function () {
+
+                $.ajax({
+                    url: selectUrl,
+                    data: {},
+                    global: false,
+                    beforeSend: function () {
+                        AddCog('AddToSchoolBtn', ' Processing...');
+                    },
+                    success: function (r) {
+                        $('#SchoolsDiv').html(r);
+
+                        MyDTInit("ssDT");
+
+                        $('#AddToSchoolBtn').hide();
+
+                        InitializeAddToSchool(SchoolRegID);
+                    },
+                    error: function (xhr) {
+                        RestoreElementShowAlert('AddToSchoolBtn', '<i class="fa fa-plus"></i> Add to School', 'MsgDiv', xhr);
+                    }
+                });
+
+            });
+        }
+
+        var addToSchoolUrl = "@Url.Action("AddRequestToSchool")";
+        function InitializeAddToSchool(SchoolRegID) {
+
+            $('#PViewContainer').on("click", '.ssDTBtn', function () {
+
+                $.ajax({
+                    url: addToSchoolUrl,
+                    data: { SchoolRegID: SchoolRegID, SchoolID: $(this.parentNode.parentNode).attr('id') },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        DeleteSuccess(r);
+                    },
+                    error: function (xhr) {
+                        ShowAlertMsg('MsgDiv', xhr);
+                    }
+                });
+
+            });
+        }
+
+        var createUrl = '@Url.Action("CreateSchool")';
+        function InitializeCreateFromRequest(SchoolRegID) {
+
+            var options = {
+                type: "POST",
+                url: createUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                    DeleteSuccess(SchoolRegID);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#AddForm').ajaxForm(options);
+        }
+
+        function ActionSuccess(data) {
+
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+        function DeleteSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+    </script>
+}
+
+

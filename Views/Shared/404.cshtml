@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "404 File Not Found";
+}
+
+@{
+    Layout = "~/Views/Shared/_ExternalLayout.cshtml";
+}
+
+<div class="container">
+    <div class="jumbotron">
+        <h2 class="text-danger"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> <span style="color: #222">404 Not Found</span></h2>
+
+        <p class="lead">Unfortunately We couldn't find the page you're looking for.</p>
+
+        <div class="clearfix" style="padding-top:20px;"></div>
+
+        <p><a class="btn btn-success btn-lg" href="@Url.Content("~/Home/Index")">Take Me to the Homepage</a></p>
+    </div>
+</div>

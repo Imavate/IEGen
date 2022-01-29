@@ -1,0 +1,45 @@
+﻿@model IEGen.Models.PromotionCommentSetupViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Promotion Comment Group</h4>
+    </div>
+    <div class="modal-body form-panel-body">
+
+        <label class="control-label">Group Name</label>
+        <p class="control-static">@Model.Name</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label"># Classes</label>
+        <p class="control-static">@Model.ClassCount</p>
+        <div class="fm-sp"></div>
+
+        <table id="pmDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th>Lower Bound</th>
+                    <th>Upper Bound</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody id="pmDTBody">
+                @foreach (var pm in Model.CommentList)
+                {
+                    <tr>
+                        <td>@pm.LowerBound</td>
+                        <td>@pm.UpperBound</td>
+                        <td>@pm.Comment</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+        <a href="@Url.Action("PromotionCommentSetup", new { GroupID = Model.GroupID })" class="btn btn-primary"><i class="fa fa-wrench"></i> Setup</a>
+    </div>
+</div>

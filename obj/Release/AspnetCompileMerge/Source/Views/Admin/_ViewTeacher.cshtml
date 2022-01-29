@@ -1,0 +1,57 @@
+﻿@model IEGen.Models.TeacherViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Teacher Details</h4>
+    </div>
+    <div class="modal-body form-panel-body">
+
+        <label class="control-label">Name</label>
+        <p class="control-static">@Model.Name</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Email</label>
+        <p class="control-static">@Model.Email</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Phone</label>
+        <p class="control-static">@Model.Phone</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">School</label>
+        <p class="control-static">@Model.SchoolName</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Location</label>
+        <p class="control-static">@Model.LocationDesc</p>
+        <div class="fm-sp"></div>
+
+        <label class="control-label">Sex</label>
+        <p class="control-static">@Model.Sex</p>
+        <div class="fm-sp"></div>
+
+        @if (Model.CTeacherID.HasValue)
+        {
+            <hr />
+
+            <label class="control-label">IET Number</label>
+            <p class="control-static">@Model.IETNumber</p>
+            <div class="fm-sp"></div>
+
+            <label class="control-label">Start Year</label>
+            <p class="control-static">@Model.StartYear</p>
+            <div class="fm-sp"></div>
+
+            <label class="control-label">Qualifications</label>
+            <p class="control-static">@Model.Qualifications</p>
+            <div class="fm-sp"></div>
+        }
+
+    </div>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+    </div>
+</div>

@@ -1,0 +1,38 @@
+﻿@model List<IEGen.Models.ResultLabelRowModel>
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Result Labels";
+}
+
+<table style="margin-bottom:0" class="resultlabels">
+    @foreach (var s in Model)
+    {
+    <tr>
+        <td>
+            <p class="rlterm">@s.Label1.TermName</p>
+            <p class="rlclass">@s.Label1.ClassName</p>
+            <div class="rlstudent"><p class="rlstudentname">@s.Label1.SurnameU</p> <p class="rlstudentname">@s.Label1.FirstName</p></div>
+        </td>
+        <td>
+            <p class="rlterm">@s.Label2.TermName</p>
+            <p class="rlclass">@s.Label2.ClassName</p>
+            <div class="rlstudent"><p class="rlstudentname">@s.Label2.SurnameU</p> <p class="rlstudentname">@s.Label2.FirstName</p></div>
+        </td>
+        <td>
+            <p class="rlterm">@s.Label3.TermName</p>
+            <p class="rlclass">@s.Label3.ClassName</p>
+            <div class="rlstudent"><p class="rlstudentname">@s.Label3.SurnameU</p> <p class="rlstudentname">@s.Label3.FirstName</p></div>
+        </td>
+        <td>
+            <p class="rlterm">@s.Label4.TermName</p>
+            <p class="rlclass">@s.Label4.ClassName</p>
+            <div class="rlstudent"><p class="rlstudentname">@s.Label4.SurnameU</p> <p class="rlstudentname">@s.Label4.FirstName</p></div>
+        </td>
+        <td>
+            <p class="rlterm">@s.Label5.TermName</p>
+            <p class="rlclass">@s.Label5.ClassName</p>
+            <div class="rlstudent"><p class="rlstudentname">@s.Label5.SurnameU</p> <p class="rlstudentname">@s.Label5.FirstName</p></div>
+        </td>
+    </tr>
+    }
+</table>

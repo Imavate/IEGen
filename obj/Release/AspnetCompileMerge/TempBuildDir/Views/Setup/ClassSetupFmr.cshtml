@@ -1,0 +1,372 @@
+﻿@model IEGen.Models.ClassSetupViewModel
+@{
+    ViewBag.Title = "Class Setup [" + Model.Name + "]";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Class Setup
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            @Html.ActionLink("All Classes", "Classes", "Setup", null, new { @class = "pull-right titlelink" })
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Name</label>
+            <p class="control-static" id="pName">@Model.Name</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Term</label>
+            <p class="control-static" id="pTerm">@Model.TermName</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Type</label>
+            <p class="control-static" id="pType">@Model.Type</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label"># Students</label>
+            <p class="control-static">@Model.StudentCount</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">Class Subjects</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="csDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="csDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default hidden-xs csAddBtn">Add New</button>
+            </div>
+        </div>
+        <table id="csDT" class="table table-hover table-bordered fullwidth" data-order="[[1, &quot;asc&quot; ],[2, &quot;asc&quot; ]]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Result</th>
+                    <th>Teacher</th>
+                </tr>
+            </thead>
+            <tbody id="csDTBody">
+                @foreach (var ag in Model.SubjectList)
+                {
+                    <tr id="@ag.SubjectID">
+                        <td><button class="btn btn-default btn-xs csDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td>@ag.Order</td>
+                        <td>@ag.Name</td>
+                        <td>@ag.CategoryName</td>
+                        <td>@ag.ResultName</td>
+                        <td>@ag.TeacherName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center"><button type="button" class="btn btn-primary csAddBtn">Add New</button></span>
+
+    </div>
+</div>
+
+<div id="TemplateDiv" class="panel panel-default" style="display:none">
+    <div class="panel-heading"><h4 class="panel-title">Available Subjects</h4></div>
+    <div id="TemplateBody" class="wide-panel-body" style="display:none">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="agDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="agDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-success hidden-xs addAllBtn">Add All</button>
+                <button type="button" class="btn btn-default hidden-xs finishBtn">Finish</button>
+            </div>
+        </div>
+        <table id="agDT" class="table table-hover table-bordered fullwidth" data-order="[[1, &quot;asc&quot; ],[2, &quot;asc&quot; ]]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Category</th>
+                    <th>Result Name</th>
+                </tr>
+            </thead>
+            <tbody id="agDTBody">
+                @foreach (var ag in Model.TemplateList)
+                {
+                    <tr id="@ag.TemplateID">
+                        <td><button class="btn btn-success btn-xs agDTBtn" title="Add Subject"><i class="fa fa-plus"></i></button></td>
+                        <td>@ag.Order</td>
+                        <td>@ag.Name</td>
+                        <td>@ag.LevelName</td>
+                        <td>@ag.CategoryName</td>
+                        <td>@ag.ResultName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center">
+            <button type="button" class="btn btn-success addAllBtn">Add All</button>
+            <button type="button" class="btn btn-primary finishBtn">Finish</button>
+        </span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#csDT';
+        var editBtn = "<button class='btn btn-default btn-xs csDTBtn' title='edit'><i class='fa fa-pencil-alt'></i></button>";
+        var addBtn = "<button class='btn btn-success btn-xs agDTBtn' title='Add Subject'><i class='fa fa-plus'></i></button>";
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("csDT");
+
+            var editClassUrl = "@Url.Action("_EditClass", new { ClassID = Model.ClassID, SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('#EditBtn').click(function () {
+
+                $.ajax({
+                    url: editClassUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        InitializePromotionChange();
+                    }
+                });
+            });
+
+            $('.csAddBtn').click(function () {
+
+                InitializeAddSubjects();
+
+            });
+
+            var editUrl = "@Url.Action("_EditSubject", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $(tbID).on("click", '.csDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { SubjectID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                    }
+                });
+            });
+
+        });
+
+        function InitializePromotionChange() {
+
+            $('#PViewContainer').on("change", '#IsPromotionalClass', function () {
+
+                if ($('#IsPromotionalClass').is(':checked')) {
+                    $('.PromotionDiv').show();
+                }
+                else {
+                    $('.PromotionDiv').hide();
+                }
+
+            });
+        }
+
+        var addSubjectUrl = "@Url.Action("AddSubject", new { ClassID = Model.ClassID })";
+        var addAllSubjectsUrl = "@Url.Action("AddAllSubjects", new { ClassID = Model.ClassID, SchoolID = Model.HeaderViewModel.SchoolID,
+                                                                     LevelID = Model.ClassLevelID, TermNumber = Model.TermNumber, Year = Model.SchoolYear })";
+        function InitializeAddSubjects() {
+
+            if ($('#TemplateDiv').css('display') == 'none') {
+
+                $('#TemplateDiv').show();
+
+                if ($('#TemplateBody').css('display') == 'none') {
+
+                    $('#TemplateBody').show();
+
+                    $('#TemplateBody').on("click", '.finishBtn', function () {
+                        $('#TemplateDiv').hide();
+                    });
+
+                    MyDTBtnInit("agDT");
+
+
+                    $('#TemplateBody').on("click", '.addAllBtn', function () {
+
+                        $.post({
+                            url: addAllSubjectsUrl,
+                            data: { },
+                            global: false,
+                            dataType: "json",
+                            beforeSend: function () {
+                                $("#loadingDiv").show();
+                            },
+                            complete: function () {
+                                $("#loadingDiv").hide();
+                            },
+                            success: function (r) {
+                                RefreshPage();
+                            }
+                        });
+
+                    });
+
+
+                    $('#TemplateBody').on("click", '.agDTBtn', function () {
+
+                        $.post({
+                            url: addSubjectUrl,
+                            data: { TemplateID: $(this.parentNode.parentNode).attr('id') },
+                            global: false,
+                            dataType: "json",
+                            beforeSend: function () {
+                                $("#loadingDiv").show();
+                            },
+                            complete: function () {
+                                $("#loadingDiv").hide();
+                            },
+                            success: function (r) {
+                                AddSubjectSuccess(r);
+                            }
+                        });
+
+                    });
+                }
+            }
+
+            $('#agDTSearchBox').focus();
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function EditClassSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            $('#pName').html(ag.Name);
+            $('#pTerm').html(ag.TermName);
+            $('#pType').html(ag.Type);
+        }
+
+        var classesUrl = "@Url.Action("Classes")";
+        function DeleteClassSuccess(data) {
+
+            window.location = classesUrl;
+
+        }
+
+        function AddSubjectSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Order, ag.Name, ag.CategoryName, ag.ResultName, ag.TeacherName];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.SubjectID);
+
+            $('#agDT').DataTable().row('#' + ag.TemplateID).remove().draw();
+        }
+
+        function EditSubjectSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Order, ag.Name, ag.CategoryName, ag.ResultName, ag.TeacherName];
+
+            $(tbID).DataTable().row('#' + ag.SubjectID).data(rowData).draw('page');
+        }
+
+        function DeleteSubjectSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [addBtn, ag.Order, ag.Name, ag.LevelName, ag.CategoryName, ag.ResultName];
+
+            var tr = $('#agDT').DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.TemplateID);
+
+            $(tbID).DataTable().row('#' + ag.SubjectID).remove().draw();
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+    </script>
+}
+
+

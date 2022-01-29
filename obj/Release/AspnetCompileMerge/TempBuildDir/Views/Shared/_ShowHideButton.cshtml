@@ -1,0 +1,9 @@
+﻿@model string
+@{
+    Layout = null;
+}
+<button class="btn btn-default btn-xs titlebtn" title="Show / Hide Details" aria-label="Show / Hide Details"
+        onclick="$('#@Model').toggle(); $(this).find('.shb').toggle();">
+    <i class="fa fa-chevron-down shb"></i>
+    <i class="fa fa-chevron-up shb" style="display:none"></i>
+</button>

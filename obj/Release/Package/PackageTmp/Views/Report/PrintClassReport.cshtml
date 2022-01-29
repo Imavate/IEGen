@@ -1,0 +1,479 @@
+﻿@model IEGen.Models.ClassPerformanceModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Class Performance - " + Model.Name;
+}
+
+<div class="panel panel-default defprint">
+    <div class="panel-heading">
+        <div class="panel-title">
+            @Model.Name
+
+            <span class="pull-right">@Model.TermName</span>
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-xs-6">
+            <label class="control-label">School</label>
+            <p class="control-static">@Model.SchoolName</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label"># Subjects</label>
+            <p class="control-static">@Model.SubjectCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-4">
+            <label class="control-label">Best Subject</label>
+            <p class="control-static">@Model.BestSubject</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth"></div>
+        <div class="col-xs-2">
+            <label class="control-label"># Pupils</label>
+            <p class="control-static">@Model.ResultCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Low. Avg.</label>
+            <p class="control-static">@Model.LowAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Mean Avg.</label>
+            <p class="control-static">@Model.MeanAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Best Avg.</label>
+            <p class="control-static">@Model.BestAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-4">
+            <label class="control-label">Best Student</label>
+            <p class="control-static">@Model.BestStudent</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+    <div style="border-top:1px solid #ddd"></div>
+    <div class="pull-left" style="position:relative">
+        <div style="position:absolute;top:129px;left:74px;font-size:14px"><b>Grade Distribution</b></div>
+        <div style="width:270px;height:270px; padding:5px">
+            <canvas id="gradeChart" width="600" height="600"></canvas>
+        </div>
+    </div>
+    <div class="pull-right pieLegend">
+        @if (Model.HasLegendA)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieA"></button> A @Model.LegendA</div>
+        }
+        @if (Model.HasLegendB)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieB"></button> B @Model.LegendB</div>
+        }
+        @if (Model.HasLegendC)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieC"></button> C @Model.LegendC</div>
+        }
+        @if (Model.HasLegendD)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieD"></button> D @Model.LegendD</div>
+        }
+        @if (Model.HasLegendE)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieE"></button> E @Model.LegendE</div>
+        }
+        @if (Model.HasLegendF)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieF"></button> F @Model.LegendF</div>
+        }
+    </div>
+    <div class="clearboth"></div>
+    <div style="border-top:1px solid #ddd"></div>
+    <div style="width:690px;height:350px;">
+        <canvas id="scoreChart" width="690" height="350"></canvas>
+    </div>
+    <div class="wide-panel-body">
+        <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Result Name</th>
+                    <th>Category</th>
+                    <th># Pupils</th>
+                    <th>Low.</th>
+                    <th>Avg.</th>
+                    <th>Best</th>
+                    <th>Best Pupil</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var s in Model.Subjects)
+                {
+                    <tr>
+                        <td style="background-color:#ddeeff !important;"><b>@s.Name</b></td>
+                        <td>@s.ResultName</td>
+                        <td>@s.CategoryName</td>
+                        <td>@s.ResultCount</td>
+                        <td>@s.LowStr</td>
+                        <td style="background-color:#f9f2b3 !important;">@s.AvgStr</td>
+                        <td>@s.BestStr</td>
+                        <td>@s.BestStudentName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="width:690px;height:350px;">
+        <canvas id="categoryChart" width="690" height="350"></canvas>
+    </div>
+    <div class="wide-panel-body">
+        <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+            <thead>
+                <tr>
+                    <th>Subject Category</th>
+                    <th># Subjects</th>
+                    <th># Pupils</th>
+                    <th>Low.</th>
+                    <th>Avg.</th>
+                    <th>Best</th>
+                    <th>Best Pupil</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var s in Model.Categories)
+                {
+                    <tr>
+                        <td style="background-color:#ddeeff !important;"><b>@s.Name</b></td>
+                        <td>@s.SubjectCount</td>
+                        <td>@s.ResultCount</td>
+                        <td>@s.LowAvgStr</td>
+                        <td style="background-color:#f9f2b3 !important;">@s.MeanAvgStr</td>
+                        <td>@s.BestAvgStr</td>
+                        <td>@s.BestStudentName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<span>&copy; @DateTime.Now.Year Imavate Education</span><span class="pull-right">www.imavate-edu.com</span>
+
+@if (Model.IsPromotionalClass)
+{
+    <div style="page-break-before: always;"></div>
+    <div class="panel panel-default defprint">
+        <div class="panel-heading">
+            <div class="panel-title">
+                @Model.Name - Academic Year Performances
+
+                <span class="pull-right">@Model.YearName</span>
+            </div>
+        </div>
+        <div class="form-panel-body row">
+            <div class="col-xs-6">
+                <label class="control-label">School</label>
+                <p class="control-static">@Model.SchoolName</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-4">
+                <label class="control-label">Best Student</label>
+                <p class="control-static">@Model.BestYearStudent</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-2">
+                <label class="control-label">Best Year Avg.</label>
+                <p class="control-static">@Model.BestYearAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="clearboth"></div>
+
+            <div class="col-xs-3">
+                <label class="control-label"># Pupils</label>
+                <p class="control-static">@Model.ResultCount</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-3">
+                <label class="control-label">Mean Year Avg.</label>
+                <p class="control-static">@Model.MeanYearAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-1">
+                <label class="control-label">#A</label>
+                <p class="control-static">@Model.YearCountA</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-1">
+                <label class="control-label">#B</label>
+                <p class="control-static">@Model.YearCountB</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-1">
+                <label class="control-label">#C</label>
+                <p class="control-static">@Model.YearCountC</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-1">
+                <label class="control-label">#D</label>
+                <p class="control-static">@Model.YearCountD</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-1">
+                <label class="control-label">#E</label>
+                <p class="control-static">@Model.YearCountE</p>
+                <div class="fm-sp"></div>
+            </div>
+            <div class="col-xs-1">
+                <label class="control-label">#F</label>
+                <p class="control-static">@Model.YearCountF</p>
+                <div class="fm-sp"></div>
+            </div>
+        </div>
+        <div class="wide-panel-body">
+            <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>1st Term</th>
+                        <th>2nd Term</th>
+                        <th>3rd Term</th>
+                        <th>Avg.</th>
+                        <th>#A</th>
+                        <th>#B</th>
+                        <th>#C</th>
+                        <th>#D</th>
+                        <th>#E</th>
+                        <th>#F</th>
+                    </tr>
+                </thead>
+                <tbody id="clDTBody">
+                    @foreach (var s in Model.YearAverages)
+                    {
+                        <tr>
+                            <td style="background-color:#ddeeff !important;"><b>@s.DisplayName</b></td>
+                            <td>@s.Term1Str</td>
+                            <td>@s.Term2Str</td>
+                            <td>@s.Term3Str</td>
+                            <td style="background-color:#f9f2b3 !important;">@s.YearAvgStr</td>
+                            <td>@s.CountA</td>
+                            <td>@s.CountB</td>
+                            <td>@s.CountC</td>
+                            <td>@s.CountD</td>
+                            <td>@s.CountE</td>
+                            <td>@s.CountF</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <span>&copy; @DateTime.Now.Year Imavate Education</span><span class="pull-right">www.imavate-edu.com</span>
+}
+@section scripts
+{
+    @Scripts.Render("~/bundles/chart")
+
+    <script type="text/javascript">
+
+        var tbID = '#clDT';
+
+        $(document).ready(function () {
+
+            ShowGradeChart();
+
+            ShowScoreChart();
+
+            ShowCategoryChart();
+        });
+
+        var gCountA = @Model.GradeCountA;
+        var gCountB = @Model.GradeCountB;
+        var gCountC = @Model.GradeCountC;
+        var gCountD = @Model.GradeCountD;
+        var gCountE = @Model.GradeCountE;
+        var gCountF = @Model.GradeCountF;
+        function ShowGradeChart(){
+
+            var gctx = $("#gradeChart");
+
+            data = {
+                datasets: [{
+                    data: [gCountA, gCountB, gCountC, gCountD, gCountE, gCountF],
+                    backgroundColor: ['#800080', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#FF0000'],
+                    borderColor: '#FF5A5E',
+                    borderWidth: 1
+                }],
+
+                labels: ['A', 'B', 'C', 'D', 'E', 'F']
+            };
+
+            var chartOptions = {
+                animation: false,
+                devicePixelRatio: 2,
+                legend: {
+                    display: false
+                },
+                plugins: {
+                    labels: [
+                      //{
+                      //    render: 'label',
+                      //    fontColor: '#000',
+                      //    position: 'outside'
+                      //},
+                      {
+                          render: 'percentage',
+                          fontStyle: 'bold',
+                          fontColor: ['#fff', '#fff'],
+                          precision: 2
+                      }
+                    ]
+                }
+            };
+
+            var gradeChart = new Chart(gctx, {
+                type: 'doughnut',
+                data: data,
+                options: chartOptions
+            });
+        }
+
+        var subjects = @Html.Raw(Model.SubjectNames);
+        var lowScores = @Model.LowestScores;
+        var avgScores = @Model.AverageScores;
+        var bestScores = @Model.BestScores;
+        function ShowScoreChart(){
+
+            var sctx = $("#scoreChart");
+
+            var scoreChart = new Chart(sctx, {
+                type: 'bar',
+                data: {
+                    labels: subjects,
+                    datasets: [{
+                        label: 'Lowest',
+                        data: lowScores,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255,99,132,1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Average',
+                        data: avgScores,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Highest',
+                        data: bestScores,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    title:{
+                        display: true,
+                        fontSize: 14,
+                        fontColor: '#000',
+                        text: 'Subject Performance Summary'
+                    },
+                    animation: false,
+                    devicePixelRatio: 2,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                autoSkip: false
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true,
+                                max: 100
+                            }
+                        }]
+                    },
+                    plugins: {
+                        labels: [
+                          {
+                              render: 'value',
+                              fontSize: 0
+                          }
+                        ]
+                    }
+
+                }
+            });
+        }
+
+        var categories = @Html.Raw(Model.CategoryNames);
+        var lowAverages = @Model.CatLowAverages;
+        var meanAverages = @Model.CatMeanAverages;
+        var bestAverages = @Model.CatBestAverages;
+        function ShowCategoryChart(){
+
+            var cctx = $("#categoryChart");
+
+            var categoryChart = new Chart(cctx, {
+                type: 'bar',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        label: 'Lowest Average',
+                        data: lowAverages,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255,99,132,1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Mean Average',
+                        data: meanAverages,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Best Average',
+                        data: bestAverages,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    title:{
+                        display: true,
+                        fontSize: 14,
+                        fontColor: '#000',
+                        text: 'Subject Category Performance Summary'
+                    },
+                    animation: false,
+                    devicePixelRatio: 2,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                autoSkip: false
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true,
+                                max: 100
+                            }
+                        }]
+                    },
+                    plugins: {
+                        labels: [
+                          {
+                              render: 'value',
+                              fontSize: 10
+                          }
+                        ]
+                    }
+
+                }
+            });
+        }
+    </script>
+}
+

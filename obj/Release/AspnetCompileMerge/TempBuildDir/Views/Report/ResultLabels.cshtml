@@ -1,0 +1,144 @@
+﻿@model IEGen.Models.ResultLabelsPageViewModel
+@{
+    ViewBag.Title = "Result Labels";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Result Labels
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="tmDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="tmDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default printBtn" title="Print for selected Schools" disabled><i class="fa fa-print text-primary"></i> Print Selected</button>
+            </div>
+        </div>
+        <table id="tmDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25">
+            <thead>
+                <tr>
+                    <th id="tmDTCheckTH" data-orderable="false" data-searchable="false"><input id="tmDTAllCheck" type="checkbox" style="pointer-events: none" /></th>
+                    <th>School</th>
+                    <th>Term</th>
+                    <th># Classes</th>
+                    <th># Students</th>
+                    <th># Subjects</th>
+                    <th># Results</th>
+                </tr>
+            </thead>
+            <tbody id="tmDTBody">
+                @foreach (var ag in Model.Terms.OrderBy(l => l.SchoolName))
+                {
+                <tr>
+                    <td><input id="tmDT_@ag.TermID" type="checkbox" class="tmDTCheck" style="pointer-events: none" /></td>
+                    <td>@ag.SchoolName</td>
+                    <td>@ag.Name</td>
+                    <td>@ag.ClassCount</td>
+                    <td>@ag.StudentCount</td>
+                    <td>@ag.SubjectCount</td>
+                    <td>@ag.ResultCount</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#tmDT';
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("tmDT");
+
+            $('#tmDTCheckTH').click(function () {
+
+                var checkbox = this.querySelector("input[type='checkbox']");
+                if (checkbox) {
+                    // if it exists, toggle the checked property
+                    $("#tmDT").find('.tmDTCheck').prop('checked', !checkbox.checked);
+                    checkbox.checked = !checkbox.checked;
+
+                    $('.printBtn').prop("disabled", false);
+                }
+            });
+
+            $('#tmDTBody').on('click', 'tr', function () {
+                var checkbox = this.querySelector("input[type='checkbox']");
+                if (checkbox) {
+                    // if it exists, toggle the checked property
+                    checkbox.checked = !checkbox.checked;
+
+                    $('.printBtn').prop("disabled", false);
+                }
+            });
+
+            var printUrl = "@Url.Action("PrintResultLabels", new { TermIDs = "123" })";
+            $('.printBtn').click(function () {
+
+                var IdArray = [];
+                var TermIDStr = "";
+                $("#tmDT").find('.tmDTCheck').each(function (index, val) {
+
+                    var Id = $(val).attr("id");
+                    var ischecked = $("#" + Id).is(":checked", true);
+                    if (ischecked) {
+
+                        var array = Id.split("_");
+                        var ItemId = array[1];
+                        IdArray.push(ItemId);
+                    }
+                    TermIDStr = IdArray.toString();
+                });
+
+                if (IdArray.length != 0) {
+
+                    window.open(printUrl.replace("123", TermIDStr), '_blank');
+                }
+
+            });
+
+        });
+    </script>
+}
+

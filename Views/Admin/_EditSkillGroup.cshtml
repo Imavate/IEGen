@@ -1,0 +1,97 @@
+﻿@model IEGen.Models.SkillGroupViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Edit Skill Group</h4>
+    </div>
+    <div id="BodyDiv">
+        @using (Ajax.BeginForm("UpdateSkillGroup", "Admin", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr)",
+                                    OnSuccess = "EditSkillGroupSuccess"
+                                },
+                                new { @class = "modal-body form-panel-body", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.SkillGroupID)
+            @Html.HiddenFor(m => m.GradeCount)
+            @Html.HiddenFor(m => m.SchoolCount)
+            @Html.HiddenFor(g => g.SchoolID)
+
+            if (Model.IsLocal)
+            {
+                <label class="control-label">School</label>
+                <p class="control-static">@Model.SchoolName</p>
+                <div class="fm-sp"></div>
+            }
+
+            @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Name)</span>
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.Skill1, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Skill1)</span>
+            @Html.TextBoxFor(m => m.Skill1, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.Skill2, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Skill2)</span>
+            @Html.TextBoxFor(m => m.Skill2, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.Skill3, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Skill3)</span>
+            @Html.TextBoxFor(m => m.Skill3, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.Skill4, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Skill4)</span>
+            @Html.TextBoxFor(m => m.Skill4, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.Skill5, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Skill5)</span>
+            @Html.TextBoxFor(m => m.Skill5, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.Skill6, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.Skill6)</span>
+            @Html.TextBoxFor(m => m.Skill6, new { @class = "form-control fm-sp" })
+
+            <div class="fm-sp pad-t5">
+                <div class="checkbox cb-btm5">
+                    <label>@Html.CheckBoxFor(m => m.IsDisabled) Is Disabled?</label>
+                </div>
+            </div>
+
+            <label class="control-label"># Grades</label>
+            <p class="control-static">@Model.GradeCount</p>
+            <div class="fm-sp"></div>
+
+            <input type="submit" id="SubmitBtn" style="display:none" />
+        }
+
+        <div class="modal-footer">
+            <div id="MsgDiv"></div>
+            <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+            @if (Model.CanEdit)
+            {
+                using (Ajax.BeginForm("DeleteSkillGroup", "Admin", new { SkillGroupID = Model.SkillGroupID },
+                                        new AjaxOptions
+                                        {
+                                            OnBegin = "AddCog('DeleteBtnO', ' Processing...')",
+                                            OnFailure = "RestoreElementShowAlert('DeleteBtnO', 'Delete', 'MsgDiv', xhr)",
+                                            OnSuccess = "DeleteSkillGroupSuccess",
+                                            Confirm = "Do you really want to delete this Skill Group?"
+                                        },
+                                        new { role = "form", style = "display:none" }))
+                {
+                    <input type="submit" id="DeleteBtn" />
+                }
+
+                <button id="DeleteBtnO" class="btn btn-warning bts" onclick="return document.getElementById('DeleteBtn').click();">Delete</button>
+
+                <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Save Changes</button>
+            }
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+﻿@model IEGen.Models.LogoViewModel
+
+<a class="navbar-brand logo" href="@Model.Url">
+    @if (Model.NoLogo)
+    {
+        <img height="100" width="100" class="img-responsive" src="~/Content/Images/IELogo.png" title="@Model.Name" />
+    }
+    else
+    {
+        <img height="100" width="100" class="img-responsive" src="@Model.LogoSrc" title="@Model.Name" />
+    }
+</a>

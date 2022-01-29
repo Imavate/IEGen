@@ -1,0 +1,33 @@
+﻿@model IEGen.Models.SimilarStudentViewModel
+
+<div class="fm-sp pad-t5">
+    <div class="checkbox cb-btm5">
+        <label>@Html.CheckBoxFor(m => m.SaveAnyway) Save Student Anyway?</label>
+    </div>
+</div>
+
+<table id="ssDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+    <thead>
+        <tr>
+            <th data-orderable="false" data-searchable="false"></th>
+            <th>Surname</th>
+            <th>First Name</th>
+            <th>Other Name</th>
+            <th>Term</th>
+            <th>Class</th>
+        </tr>
+    </thead>
+    <tbody id="auDTBody">
+        @foreach (var au in Model.StudentList)
+        {
+            <tr id="@au.StudentID">
+                <td><button type="button" class="btn btn-success btn-xs ssDTBtn" data-id="@Model.ClassID" data-name="@au.DisplayName" title="Change Class"><i class="fa fa-check"></i></button></td>
+                <td>@au.Surname</td>
+                <td>@au.FirstName</td>
+                <td>@au.OtherName</td>
+                <td>@au.TermName</td>
+                <td>@au.ClassName</td>
+            </tr>
+        }
+    </tbody>
+</table>

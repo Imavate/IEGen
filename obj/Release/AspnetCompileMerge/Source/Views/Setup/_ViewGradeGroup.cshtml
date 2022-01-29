@@ -1,0 +1,53 @@
+﻿@model IEGen.Models.ViewGradeGroupViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Grade Group Details</h4>
+    </div>
+    <div class="modal-body form-panel-body">
+
+        @if (Model.IsLocal)
+        {
+            <label class="control-label">School</label>
+            <p class="control-static">@Model.SchoolName</p>
+            <div class="fm-sp"></div>
+        }
+
+        <label class="control-label">Group Name</label>
+        <p class="control-static">@Model.DisplayName</p>
+        <div class="fm-sp"></div>
+
+        <table id="pmDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Lower Bound</th>
+                    <th>Upper Bound</th>
+                    <th>Summary Grade</th>
+                </tr>
+            </thead>
+            <tbody id="pmDTBody">
+                @foreach (var pm in Model.GradeList)
+                {
+                    <tr id="@pm.GradeID">
+                        <td>@pm.Name</td>
+                        <td>@pm.LowerBound</td>
+                        <td>@pm.UpperBound</td>
+                        <td>@pm.SummaryGradeName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+    <div class="modal-footer">
+        <div id="MsgDiv"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+        @if (Model.CanEdit)
+        {
+            @Html.ActionLink("Edit", "GradeSetup", new { GradeGroupID = Model.GradeGroupID }, new { @class = "btn btn-primary" })
+        }
+    </div>
+</div>

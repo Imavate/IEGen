@@ -1,0 +1,207 @@
+﻿@model IEGen.Models.StudentsPageViewModel
+@{
+    ViewBag.Title = "Student Results";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Student Results
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAppAdmin)
+                {
+                    <a href="@Url.Action("Schools", "Admin")" title="View All Schools">@Model.SchoolName</a>
+                }
+                else
+                {
+                    @Model.SchoolName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="uDTSSSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="uDTSSSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <button id="uDTSS_FiltersBtn" class="btn btn-default">More Filters <i class="fa fa-filter fa-lg text-primary"></i></button>
+            </div>
+        </div>
+        <div id="uDTSS_FiltersRow" class="filter-div" style="display:none">
+            <div class="panel panel-primary">
+                <div class="row filter-row">
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Term</label>
+                        @Html.DropDownListFor(m => m.TermFilter, Model.TermList, "-- All Terms --", new { @class = "form-control" })
+                    </div>
+                    <div id="ClassDiv" class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Class</label>
+                        @Html.DropDownListFor(m => m.ClassFilter, Model.ClassList, "-- All Classes --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Level</label>
+                        @Html.DropDownListFor(m => m.LevelFilter, Model.LevelList, "-- All Levels --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Sex</label>
+                        @Html.EnumDropDownListFor(m => m.SexFilter, "-- All Sexes --", new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table id="uDTSS" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25"></table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#uDTSS';
+        var schoolID = '@Model.HeaderViewModel.SchoolID';
+
+        $(document).ready(function () {
+
+            var columns = [{
+                "title": "",
+                "data": "Button",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Term",
+                "data": "TermName",
+                "searchable": true
+            },
+            {
+                "title": "Class",
+                "data": "ClassName",
+                "searchable": true
+            },
+            {
+                "title": "Name",
+                "data": "DisplayName",
+                "searchable": true
+            },
+            {
+                "title": "#",
+                "data": "SubjectCount"
+            },
+            {
+                "title": "Low",
+                "data": "LowStr"
+            },
+            {
+                "title": "Avg.",
+                "data": "AvgStr"
+            },
+            {
+                "title": "High",
+                "data": "HighStr"
+            },
+            {
+                "title": "Imp.",
+                "data": "ImpFull"
+            },
+            {
+                "title": "Pos.",
+                "data": "Position"
+            },
+            {
+                "title": "Best Subject",
+                "data": "BestSubjectName"
+            }];
+
+            var nodata = function (data) { };
+
+            var uDTSS_data = function (data) {
+                data.SchoolID = schoolID;
+                data.ClassID = $("#ClassFilter").val();
+                data.TermID = $("#TermFilter").val();
+                data.LevelID = $("#LevelFilter").val();
+                data.SexID = $("#SexFilter").val();
+            };
+
+            MyDTBtnInitSS("uDTSS", "@Url.Action("GetStudentReportList", "Report", null)", columns, uDTSS_data);
+
+
+            //for server side... no auto post back
+            $("#uDTSSSearchBox").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    $("#uDTSSSearchBtn").click();
+                }
+            });
+
+            $('#uDTSS_FiltersBtn').click(function () {
+                $('#uDTSS_FiltersRow').toggle();
+
+                if ($("#ClassFilter").val() != "" || $("#TermFilter").val() != "" || $("#LevelFilter").val() != "" || $("#SexFilter").val() != "")
+                    $('#uDTSS_FiltersBtn').html('More Filters <i class="fa fa-filter fa-lg text-primary"></i>');
+                else
+                    $('#uDTSS_FiltersBtn').html("More Filters");
+
+                //going from open to close... note that toggle has already been called
+                if ($('#uDTSS_FiltersRow').css('display') === 'none') {
+                    $("#uDTSSSearchBtn").click();
+                }
+            });
+
+            var resUrl = "@Url.Action("PrintStudentResult", "Report", new { StudentID = 123 })";
+            $(tbID).on("click", '.pDTBtn', function () {
+                window.open(resUrl.replace("123", $(this).data('id')) + "?ClassID=" + $(this).data('cid'), '_blank');
+            });
+
+            var classFilterUrl = "@Url.Action("_ClassFilter", "Report")";
+            $('#TermFilter').change(function () {
+
+                $.ajax({
+                    url: classFilterUrl,
+                    data: { TermID: this.value },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        $('#ClassDiv').html(r);
+                    }
+                });
+            });
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+    </script>
+}

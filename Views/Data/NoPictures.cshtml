@@ -1,0 +1,153 @@
+﻿@model IEGen.Models.NoPicturePageViewModel
+@{
+    ViewBag.Title = "Students without pictures";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Students without pictures
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[[7, &quot;asc&quot; ],[8, &quot;asc&quot; ],[3, &quot;asc&quot; ],[4, &quot;asc&quot; ]]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Code</th>
+                    <th>Surname</th>
+                    <th>First Name</th>
+                    <th>Other Name</th>
+                    <th>Sex</th>
+                    <th>Level</th>
+                    <th>Class</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.Students)
+                {
+                <tr id="@ag.StudentID">
+                    <td><button class="btn btn-default btn-xs eDTBtn" title="edit student"><i class="fa fa-pencil-alt"></i></button></td>
+                    <td><button class="btn btn-default btn-xs vDTBtn" title="view student"><i class="fa fa-search"></i></button></td>
+                    <td>@ag.Code</td>
+                    <td>@ag.Surname</td>
+                    <td>@ag.FirstName</td>
+                    <td>@ag.OtherName</td>
+                    <td>@ag.Sex</td>
+                    <td>@ag.Level</td>
+                    <td>@ag.ClassName</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#clDT';
+        $(document).ready(function () {
+
+            MyDTBtnInit("clDT");            
+
+            var editUrl = "@Url.Action("_EditStudent", "Setup", new { DefTermID = Model.TermID })";
+            var defTermName = "@Model.TermName";
+            $(tbID).on("click", '.eDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { StudentID: $(this.parentNode.parentNode).attr('id'), DefTermName: defTermName },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeEdit();
+                     }
+                 });
+            });
+
+            var viewUrl = "@Url.Action("StudentView", "Setup", new { StudentID = "123" })";
+            $(tbID).on("click", '.vDTBtn', function () {
+
+                window.open(viewUrl.replace("123", $(this.parentNode.parentNode).attr('id')), "_blank");
+            });
+        });
+
+        function ShowModal(content) {
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        var updateUrl = '@Url.Action("UpdateStudent", "Setup")';
+        function InitializeEdit() {
+
+            InitializeDatePicker("BirthDate");
+
+            var options = {
+                type: "POST",
+                url: updateUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    RefreshPage();
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UpdateForm').ajaxForm(options);
+        }
+    </script>
+}

@@ -1,0 +1,154 @@
+﻿@model IEGen.Models.HeaderViewModel
+
+<header>
+    <div class="container" style="padding:0px">
+        <nav class="navbar navbar-default" style="background: url(@Url.Content("~/Content/Images/header.png")">
+            <div class="navbar-header" style="height:100px">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbody" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+                @{ Html.RenderAction("_Logo", "Shared", new { SchoolID = Model.SchoolID }); }
+            </div>
+            <div class="collapse navbar-collapse" id="navbody">
+                <ul class="nav navbar-nav navadj">
+                    <li class="@Model.HomeClass">@Html.ActionLink("Home", "Index", "Home")</li>
+
+                    @if (Model.Has_DataEntry)
+                    {
+                        <li class="dropdown @Model.DataClass">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Data Entry <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Subject Scores", "Subjects", "Data")</li>
+                                <li>@Html.ActionLink("Class Scores", "Classes", "Data")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Teacher Comments", "TeacherComments", "Data")</li>
+                                <li>@Html.ActionLink("Principal Comments", "PrincipalComments", "Data")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Skills", "Skills", "Data")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("No Pictures", "NoPictures", "Data")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Score Sheets", "ScoreSheets", "Data")</li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (Model.Has_ViewReports)
+                    {
+                        <li class="dropdown @Model.ReportClass">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Reports <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Home", "Index", "Report")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Class Reports", "ClassReports", "Report")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Student Reports", "StudentReports", "Report")</li>
+                                <li>@Html.ActionLink("Subject Reports", "SubjectReports", "Report")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Term Performance", "TermReports", "Report")</li>
+                                <li>@Html.ActionLink("Subject Templates", "TemplateReports", "Report")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Other Exams", "OtherExams", "Report")</li>
+                                <li>@Html.ActionLink("Other Exam Results", "OtherExamResults", "Report")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("School Performance", "SchoolReports", "Report")</li>
+                                <li>@Html.ActionLink("Transcripts", "Transcripts", "Report")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Result Labels", "ResultLabels", "Report")</li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (Model.Has_ViewSetup)
+                    {
+                        <li class="dropdown @Model.SetupClass">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Setup <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Term Classes", "Classes", "Setup")</li>
+                                <li>@Html.ActionLink("Students", "Students", "Setup")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Result Formats", "EntryFormats", "Setup")</li>
+                                <li>@Html.ActionLink("Subject Setup", "SubjectTemplates", "Setup")</li>
+                                <li>@Html.ActionLink("Class Arms", "ClassArms", "Setup")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li class="dropdown dropdown-submenu">
+                                    <a href="#" tabindex="-1" class="dropdown-toggle" data-toggle="dropdown">Comments</a>
+                                    <ul class="dropdown-menu">
+                                        <li>@Html.ActionLink("Performance", "PerformanceComments", "Setup")</li>
+                                        <li>@Html.ActionLink("Promotional", "PromotionComments", "Setup")</li>
+                                        <li>@Html.ActionLink("Improvement", "ImprovementComments", "Setup")</li>
+                                    </ul>
+                                </li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Score Grades", "SchoolGrades", "Setup")</li>
+                                <li>@Html.ActionLink("Soft Skills", "SchoolSkills", "Setup")</li>
+                                <li>@Html.ActionLink("Other Exams", "OtherExamTypes", "Setup")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Uploaded Students", "UploadedStudents", "Setup")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("School Setup", "School", "Setup")</li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (Model.Has_ManageUsers)
+                    {
+                        <li class="dropdown @Model.AdminClass">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("Schools", "Schools", "Admin")</li>
+                                <li>@Html.ActionLink("All Students", "Students", "Admin")</li>
+                                <li>@Html.ActionLink("All Teachers", "Teachers", "Admin")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("New Requests", "NewRequests", "Admin")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("Check Teachers", "CTeachers", "Admin")</li>
+                                <li role="separator" class="divider"></li>
+
+                                @if (!IEGen.Models.General.UseAzureFileStorage)
+                                {
+                                    <li>@Html.ActionLink("IPSEDU Students", "FormerStudents", "Admin")</li>
+                                    <li role="separator" class="divider"></li>
+                                }
+
+                                <li>@Html.ActionLink("Locations", "Locations", "Admin")</li>
+                                <li>@Html.ActionLink("Grade Groups", "GradeGroups", "Admin")</li>
+                                <li>@Html.ActionLink("Skill Groups", "SkillGroups", "Admin")</li>
+                                <li role="separator" class="divider"></li>
+
+                                <li>@Html.ActionLink("User Accounts", "Users", "Admin")</li>
+                                <li>@Html.ActionLink("Access Groups", "AccessGroups", "Admin")</li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+                <p class="navbar-text navadjp">
+                    <em>@Html.ActionLink(Model.LoggedInUser, "MyDetails", "Home")</em> |
+                    @Html.ActionLink("Sign Out", "SignOut", "Account", null, new { @class = "navbar-link", style = "color:DarkOrange" })
+                </p>
+            </div>
+        </nav>
+    </div>
+</header>
+

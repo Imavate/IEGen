@@ -1,0 +1,4 @@
+﻿@model IEGen.Models.SubjectReportPageModel
+
+<label class="control-label">Class</label>
+@Html.DropDownListFor(m => m.ClassFilter, Model.ClassList, "-- All Classes --", new { @class = "form-control" })

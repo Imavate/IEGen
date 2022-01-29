@@ -1,0 +1,124 @@
+﻿@model IEGen.Models.TemplateReportPageViewModel
+@{
+    ViewBag.Title = "Subject Template Reports";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Subject Template Reports
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("Schools", "Admin")" title="Change School">@Model.SchoolName</a>
+                }
+                else
+                {
+                    @Model.SchoolName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        <i class="fa fa-print"></i> Print by Level <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        @foreach (var l in Model.Levels)
+                        {
+                            <li><a href="#" class="levelprint" id="@l.LevelID">@l.LevelName</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[[2, &quot;asc&quot; ],[3, &quot;asc&quot; ],[1, &quot;asc&quot; ]]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th title="Order">#</th>
+                    <th title="Number of Subjects"># Subs</th>
+                    <th title="Number of Pupils"># Pupils</th>
+                    <th title="Lowest Score">Low.</th>
+                    <th title="Average Score">Avg.</th>
+                    <th title="Highest Score">High.</th>
+                    <th>Best Student</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.Subjects)
+                {
+                <tr id="@ag.TemplateID">
+                    <td><button class="btn btn-default btn-xs pDTBtn" title="print report"><i class="fa fa-print"></i></button></td>
+                    <td>@ag.Name</td>
+                    <td>@ag.LevelName</td>
+                    <td>@ag.Order</td>
+                    <td>@ag.SubjectCount</td>
+                    <td>@ag.ResultCount</td>
+                    <td>@ag.LowStr</td>
+                    <td>@ag.AvgStr</td>
+                    <td>@ag.HighStr</td>
+                    <td>@ag.BestStudentName</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#clDT';
+        $(document).ready(function () {
+
+            MyDTBtnInit("clDT");
+
+            var printUrl = "@Url.Action("PrintTemplateReport", "Report", new { SchoolID = Model.HeaderViewModel.SchoolID, TemplateID = "123" })";
+            $(tbID).on("click", '.pDTBtn', function () {
+
+                window.open(printUrl.replace("123", $(this.parentNode.parentNode).attr('id')), "_blank");
+            });
+
+            var lprintUrl = "@Url.Action("PrintTemplateReports", new { SchoolID = Model.HeaderViewModel.SchoolID, LevelID = "123" })";
+            $('.levelprint').click(function () {
+
+                window.open(lprintUrl.replace("123", $(this).attr('id')), "_blank");
+            });
+        });
+    </script>
+}

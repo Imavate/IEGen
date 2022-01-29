@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IE Portal - @ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <link rel="icon" href="~/Content/Images/favicon16.png" sizes="16x16" runat="server">
+    <link rel="icon" href="~/Content/Images/favicon32.png" sizes="32x32" runat="server">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="~/Content/Images/favicon144.png" runat="server">
+    <link rel="apple-touch-icon-precomposed" href="~/Content/Images/favicon152.png" runat="server">
+
+    <script defer src="~/Scripts/fontawesome/fa-solid.min.js"></script>
+    @*<script defer src="~/Scripts/fontawesome/fa-regular.min.js"></script>*@
+    <script src="~/Scripts/fontawesome/fontawesome.min.js"></script>
+
+    @RenderSection("headscripts", required: false)
+
+</head>
+<body>
+
+    @{ Html.RenderAction("_WebHeader", "Shared"); }
+
+    <div class="container body-content" style="border:1px solid #D1D1D1; padding:2px; font-size:14px; line-height: 1.42857143;">
+        @RenderBody()
+    </div>
+
+    @{ Html.RenderPartial("_Footer"); }
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/site")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

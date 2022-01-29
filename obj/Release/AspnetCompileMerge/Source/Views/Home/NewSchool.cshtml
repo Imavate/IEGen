@@ -1,0 +1,129 @@
+﻿@model IEGen.Models.AddSchoolRegViewModel
+
+@{
+    ViewBag.Title = "Start";
+}
+
+@{
+    Layout = "~/Views/Shared/_WebLayout.cshtml";
+}
+
+<div class="panel panel-primary ext-page">
+    <div class="panel-heading"><h4 class="panel-title">Register School / Make Enquiries</h4></div>
+    <div class="panel-body row">
+        <div class="col-md-6">
+            <form id="RequestForm" style="padding-bottom:30px;">
+                @Html.LabelFor(m => m.Name, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Name)</span>
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.ContactPerson, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.ContactPerson)</span>
+                @Html.TextBoxFor(m => m.ContactPerson, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.SchoolType, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.SchoolType)</span>
+                @Html.EnumDropDownListFor(m => m.SchoolType, "-- Select School Type --", new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Phone, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Phone)</span>
+                @Html.TextBoxFor(m => m.Phone, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Email, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Email)</span>
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Address, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Address)</span>
+                @Html.TextAreaFor(m => m.Address, 3, 50, new { @class = "form-control fm-sp" })
+
+                @Html.LabelFor(m => m.Notes, new { @class = "control-label" })
+                <span class="validation-msg">@Html.ValidationMessageFor(m => m.Notes)</span>
+                @Html.TextAreaFor(m => m.Notes, 3, 50, new { @class = "form-control fm-sp" })
+
+                <div style="padding:20px 0;">
+                    <div class="g-recaptcha" data-sitekey="@ViewBag.SiteKey"></div>
+                </div>
+
+                <div id="MsgDiv"></div>
+
+                <button id="SubmitBtnO" class="btn btn-success btn-lg">Submit Request</button>
+            </form>
+
+            <div id="SuccessDiv"></div>
+
+            <div id="InfoDiv" class="hidden-xs hidden-sm">
+                <h4>Immediate Advantages to the School Include:</h4>
+                <div class="list-group">
+                    <a href="#" class="list-group-item">The student result presentation enhances the brand of the school as an institution that is on the global competitive edge in technology and education and presents parents with a ready tool for word of mouth advertisement for the school.</a>
+                    <a href="#" class="list-group-item">Management and Staff are able to focus on other end of term activities such as setting exams, marking and other school programs.</a>
+                    <a href="#" class="list-group-item">Generation of results is faster <span class="text-primary">(done within three days)</span>, the process prevents errors and is always monitored.</a>
+                    <a href="#" class="list-group-item">Results are given greater authenticity and prospective parents and students have a platform to understand the school’s performances across broad.</a>
+                    <a href="#" class="list-group-item">Ultimately the school gets a more effective result processing system, a ready analysis of the academic performance for the term and academic year, tools for decision making, cutting edge and evolving education research, more productive work force and time, better performing students and of better focus towards fulfilling its vision of excellence.</a>
+                </div>
+                <p class="text-primary" style="font-weight: bold;">No extra equipment is needed by the school. We will provide score sheets for score recording by teachers then analyze, produce and package the results which are then collected by the school.</p>
+                <p>Imavate Education is committed to offering you the best research, data analysis and information management backed by renowned educationalists, professional guidance counsellors and complex system analysts.</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="well">
+                <img alt="Student Report" src="@Url.Content("~/Content/Images/exam.png")" class="img-responsive" />
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section headscripts
+{
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var createUrl = '@Url.Action("SubmitSchoolRequest")';
+            var options = {
+                type: "POST",
+                url: createUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(xhr);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#RequestForm').ajaxForm(options);
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function ActionSuccess(xhr) {
+
+            $('#RequestForm').hide();
+            $('#InfoDiv').removeClass('hidden-sm hidden-xs');
+
+            ShowAlertMsg('SuccessDiv', xhr);
+        }
+
+    </script>
+}

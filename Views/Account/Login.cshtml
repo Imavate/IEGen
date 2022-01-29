@@ -1,0 +1,90 @@
+﻿@using IEGen.Models
+@model LoginViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IE Portal - Log In</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <link rel="icon" href="~/Content/Images/favicon16.png" sizes="16x16" runat="server">
+    <link rel="icon" href="~/Content/Images/favicon32.png" sizes="32x32" runat="server">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="~/Content/Images/favicon144.png" runat="server">
+    <link rel="apple-touch-icon-precomposed" href="~/Content/Images/favicon152.png" runat="server">
+
+    <script defer src="~/Scripts/fontawesome/fa-solid.min.js"></script>
+    <script src="~/Scripts/fontawesome/fontawesome.min.js"></script>
+
+</head>
+<body>
+    <div class="container" style="height:780px; background-image:url(@Url.Content("~/Content/Images/loginbg.jpg")); background-size:cover">
+        
+        <div class="logoText"><img class="img-responsive" src="@Url.Content("~/Content/Images/logo300.png")" height="71" width="300" /></div>
+        <div class="logindiv">
+            <h4>Log in</h4>
+            <hr />
+
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { id = "LoginForm", role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger", style = "background-color:white" })
+                <div class="form-group input-only">
+                    <label class="control-label">@Html.DisplayNameFor(m => m.Email)</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-envelope fa-fw"></i></span>
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @placeholder = "Email" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group input-only">
+                    <label class="control-label">@Html.DisplayNameFor(m => m.Password)</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", @placeholder = "Password" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                </div>
+                <div class="checkbox">
+                    <label style="font-weight:bold;color:purple;">@Html.CheckBoxFor(m => m.RememberMe) @Html.DisplayNameFor(m => m.RememberMe)</label>
+                </div>
+                <button id="LoginBtn" type="submit" class="btn btn-success">Log In &nbsp; <i class="fa fa-sign-in-alt" aria-hidden="true"></i></button>
+                <span style="padding-right:10px;"></span>
+
+                <p style="padding-top:15px">
+                    @Html.ActionLink("Forgot your password?", "ForgotPassword", null, new { style = "background-color:white" })
+                </p>
+            }
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/site")
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+            $('#LoginForm').submit(function () {
+
+                if ($('#LoginForm').valid()) {
+                    AddCog('LoginBtn', ' Signing you in...');
+                }
+            });
+
+        });
+
+    </script>
+</body>
+</html>

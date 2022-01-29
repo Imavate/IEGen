@@ -1,0 +1,26 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+}
+
+@{
+    Layout = "~/Views/Shared/_ExternalLayout.cshtml";
+}
+
+<div class="container">
+    <div class="jumbotron">
+        <h2 class="text-danger"><span class="fa fa-exclamation-triangle"></span> <span style="color: #222">Our Sincere Apologies, An Error has Occurred</span></h2>
+
+        <p class="lead">Unfortunately an error occured during the current request.</p>
+
+        <div class="clearfix" style="padding-top:10px;"></div>
+
+        <a style="cursor:pointer" onclick="javascript:history.back();">Go back</a> and try again.
+
+        <div class="clearfix" style="padding-top:20px;"></div>
+
+        <p><a class="btn btn-success btn-lg" href="@Url.Content("~/Home/Index")">Take Me to the Homepage</a></p>
+    </div>
+</div>
+

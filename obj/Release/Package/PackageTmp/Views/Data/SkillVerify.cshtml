@@ -1,0 +1,163 @@
+﻿@model IEGen.Models.ClassSkillVPageViewModel
+@{
+    ViewBag.Title = Model.Name + " Qualitative Skill Entry";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <b>@Model.Name</b> Qualitative Skill Verification
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div id="BodyDiv" class="wide-panel-body">
+        <b>Grading Guide:</b> @Model.GradeGuide
+        @using (Ajax.BeginForm("VerifySkillEntry", "Data", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtn', ' Processing...')",
+                                    OnFailure = "ProcessVerifyError(xhr, status, error)"
+                                },
+                                new { role = "form" }))
+        {
+            @Html.HiddenFor(m => m.ClassID)
+            @Html.HiddenFor(m => m.MinScore)
+            @Html.HiddenFor(m => m.MaxScore)
+            <table id="csDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>@Model.Skill1</th>
+                        <th>@Model.Skill2</th>
+                        <th>@Model.Skill3</th>
+                        <th>@Model.Skill4</th>
+                        <th>@Model.Skill5</th>
+                        <th>@Model.Skill6</th>
+                    </tr>
+                </thead>
+                <tbody id="csDTBody">
+                    @for (int i = 0; i < Model.Entries.Count; i++)
+                    {
+                        <tr>
+                            <td>@Model.Entries[i].SerialNumber</td>
+                            <td>@Model.Entries[i].DisplayName</td>
+                            <td class="crel">
+                                @Html.HiddenFor(m => m.Entries[i].SerialNumber)
+                                @Html.HiddenFor(m => m.Entries[i].DisplayName)
+                                @Html.HiddenFor(m => m.Entries[i].StudentID)
+                                @Html.HiddenFor(m => m.Entries[i].MinScore)
+                                @Html.HiddenFor(m => m.Entries[i].MaxScore)
+                                @Html.HiddenFor(m => m.Entries[i].SkillScore1)
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore1V)</span>
+                                @if (i == 0)
+                                {
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore1V, new { @class = "form-control ftext", type = "number" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore1V, new { @class = "form-control", type = "number" })
+                                }
+                            </td>
+                            <td class="crel">
+                                @if (Model.HasSkill2)
+                                {
+                                    @Html.HiddenFor(m => m.Entries[i].SkillScore2)
+                                    <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore2V)</span>
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore2V, new { @class = "form-control", type = "number" })
+                                }
+                            </td>
+                            <td class="crel">
+                                @if (Model.HasSkill3)
+                                {
+                                    @Html.HiddenFor(m => m.Entries[i].SkillScore3)
+                                    <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore3V)</span>
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore3V, new { @class = "form-control", type = "number" })
+                                }
+                            </td>
+                            <td class="crel">
+                                @if (Model.HasSkill4)
+                                {
+                                    @Html.HiddenFor(m => m.Entries[i].SkillScore4)
+                                    <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore4V)</span>
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore4V, new { @class = "form-control", type = "number" })
+                                }
+                            </td>
+                            <td class="crel">
+                                @if (Model.HasSkill5)
+                                {
+                                    @Html.HiddenFor(m => m.Entries[i].SkillScore5)
+                                    <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore5V)</span>
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore5V, new { @class = "form-control", type = "number" })
+                                }
+                            </td>
+                            <td class="crel">
+                                @if (Model.HasSkill6)
+                                {
+                                    @Html.HiddenFor(m => m.Entries[i].SkillScore6)
+                                    <span class="rowval">@Html.ValidationMessageFor(m => m.Entries[i].SkillScore6V)</span>
+                                    @Html.TextBoxFor(m => m.Entries[i].SkillScore6V, new { @class = "form-control", type = "number" })
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <button id="SubmitBtn" class="btn btn-success">Validate Entries</button>
+
+            @Html.ActionLink("Cancel", "Skills", null, new { @class = "btn btn-default" })
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/customval")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $('.ftext:first').focus();
+
+        });
+
+        function ProcessVerifyError(xhr, status, error) {
+
+            if (xhr.status === 480) {
+
+                RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'BodyDiv', xhr);
+                $('.ftext:first').focus();
+            }
+            else {
+                RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+            }
+        }
+
+
+    </script>
+}
+
+

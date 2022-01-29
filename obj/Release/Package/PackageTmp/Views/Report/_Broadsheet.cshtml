@@ -1,0 +1,86 @@
+﻿@model IEGen.Models.BroadsheetViewModel
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title" style="font-weight:bold; font-size:larger">
+            @Model.Name
+
+            <span class="pull-right">@Model.TermName</span>
+        </div>
+    </div>
+    <div class="form-panel-body flexrow">
+        <div class="div">
+            <label class="control-label">School: </label>
+            <span class="control-static">@Model.SchoolName</span>
+        </div>
+        <div class="div">
+            <label class="control-label"># Pupils: </label>
+            <span class="control-static">@Model.ResultCount</span>
+        </div>
+        <div class="div">
+            <label class="control-label"># Subjects: </label>
+            <span class="control-static">@Model.SubjectCount</span>
+        </div>
+        <div class="div">
+            <label class="control-label">Best Pupil: </label>
+            <span class="control-static">@Model.BestStudent</span>
+        </div>
+        <div class="div">
+            <label class="control-label">Best Subject: </label>
+            <span class="control-static">@Model.BestSubject</span>
+        </div>
+        <div class="div">
+            <label class="control-label">Max. Score: </label>
+            <span class="control-static">100</span>
+        </div>
+        <div class="div">
+            <label class="control-label">Mean Average: </label>
+            <span class="control-static">@Model.MeanAvgStr</span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+            <thead>
+                <tr>
+                    <th style="min-width:150px"></th>
+                    @foreach(var h in Model.Subjects)
+                    {
+                        <th>@h.ResultName</th>
+                    }
+                    <th>Avg.</th>
+                    <th>Pos.</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var s in Model.Rows)
+                {
+                    <tr>
+                        <td style="background-color:#ddeeff !important;"><b>@s.StudentName</b></td>
+
+                        @foreach (var sc in s.Scores)
+                        {
+                            var TotalStyle = sc.Total < Model.RedLine ? "color:#ff0000 !important;" : "";
+                            <td><span style="@TotalStyle">@sc.TotalStr</span></td>
+                        }
+
+                        <td style="background-color:#f9f2b3 !important;">@s.AvgStr</td>
+                        <td>@s.Position</td>
+                    </tr>
+                }
+
+                <tr>
+                    <td>Average Scores</td>
+
+                    @foreach (var s in Model.Subjects)
+                    {
+                        <td>@s.AvgStr</td>
+                    }
+
+                    <td style="background-color:#f9f2b3 !important;">@Model.MeanAvgStr</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<span>&copy; @DateTime.Now.Year Imavate Education</span><span class="pull-right">www.imavate-edu.com</span>

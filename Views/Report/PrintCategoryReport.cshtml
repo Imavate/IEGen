@@ -1,0 +1,252 @@
+﻿@model IEGen.Models.CategoryPerformanceModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Subject Category Performance: " + Model.CategoryName + "-" + Model.TermRange;
+}
+
+<div class="panel panel-default defprint">
+    <div class="panel-heading">
+        <div class="panel-title">
+            @Model.CategoryName
+
+            <span class="pull-right">@Model.TermRange</span>
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-xs-2">
+            <label class="control-label"># Subjects</label>
+            <p class="control-static">@Model.SubjectCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label"># Pupils</label>
+            <p class="control-static">@Model.ResultCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Current Avg.</label>
+            <p class="control-static">@Model.CurrentAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Low. Avg.</label>
+            <p class="control-static">@Model.LowAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Mean Avg.</label>
+            <p class="control-static">@Model.MeanAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-xs-2">
+            <label class="control-label">Best Avg.</label>
+            <p class="control-static">@Model.BestAvgStr</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+    <div style="border-top:1px solid #ddd"></div>
+    <div class="pull-left" style="position:relative">
+        <div style="position:absolute;top:129px;left:74px;font-size:14px"><b>Grade Distribution</b></div>
+        <div style="width:270px;height:270px; padding:5px">
+            <canvas id="gradeChart" width="600" height="600"></canvas>
+        </div>
+    </div>
+    <div class="pull-right pieLegend">
+        @if (Model.PieLegend.HasLegendA)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieA"></button> A @Model.PieLegend.LegendA</div>
+        }
+        @if (Model.PieLegend.HasLegendB)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieB"></button> B @Model.PieLegend.LegendB</div>
+        }
+        @if (Model.PieLegend.HasLegendC)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieC"></button> C @Model.PieLegend.LegendC</div>
+        }
+        @if (Model.PieLegend.HasLegendD)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieD"></button> D @Model.PieLegend.LegendD</div>
+        }
+        @if (Model.PieLegend.HasLegendE)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieE"></button> E @Model.PieLegend.LegendE</div>
+        }
+        @if (Model.PieLegend.HasLegendF)
+        {
+            <div class="fm-sp"><button class="btn btn-default pieF"></button> F @Model.PieLegend.LegendF</div>
+        }
+    </div>
+    <div class="clearboth"></div>
+    <div style="border-top:1px solid #ddd"></div>
+    <div style="width:690px;height:350px;">
+        <canvas id="categoryChart" width="690" height="350"></canvas>
+    </div>
+    <div class="wide-panel-body">
+        <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th># Subjects</th>
+                    <th># Pupils</th>
+                    <th>Low.</th>
+                    <th>Avg.</th>
+                    <th>High.</th>
+                    <th>Best Subject</th>
+                    <th>Best Pupil</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var s in Model.TermStats)
+                {
+                    <tr>
+                        <td style="background-color:#ddeeff !important;"><b>@s.TermName</b></td>
+                        <td>@s.SubjectCount</td>
+                        <td>@s.ResultCount</td>
+                        <td>@s.LowStr</td>
+                        <td style="background-color:#f9f2b3 !important;">@s.AvgStr</td>
+                        <td>@s.HighStr</td>
+                        <td>@s.BestSubjectName [@s.BestSubAvgStr]</td>
+                        <td>@s.BestStudentName [@s.BestAvgStr]</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<span>&copy; @DateTime.Now.Year Imavate Education</span><span class="pull-right">www.imavate-edu.com</span>
+@section scripts
+{
+    @Scripts.Render("~/bundles/chart")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            ShowGradeChart();
+
+            ShowCategoryChart();
+        });
+
+        var gCountA = @Model.ACount;
+        var gCountB = @Model.BCount;
+        var gCountC = @Model.CCount;
+        var gCountD = @Model.DCount;
+        var gCountE = @Model.ECount;
+        var gCountF = @Model.FCount;
+        function ShowGradeChart(){
+
+            var gctx = $("#gradeChart");
+
+            data = {
+                datasets: [{
+                    data: [gCountA, gCountB, gCountC, gCountD, gCountE, gCountF],
+                    backgroundColor: ['#800080', '#0000FF', '#00FF00', '#FFFF00', '#FFA500', '#FF0000'],
+                    borderColor: '#FF5A5E',
+                    borderWidth: 1
+                }],
+
+                labels: ['A', 'B', 'C', 'D', 'E', 'F']
+            };
+
+            var chartOptions = {
+                animation: false,
+                devicePixelRatio: 2,
+                legend: {
+                    display: false
+                },
+                plugins: {
+                    labels: [
+                      //{
+                      //    render: 'label',
+                      //    fontColor: '#000',
+                      //    position: 'outside'
+                      //},
+                      {
+                          render: 'percentage',
+                          fontStyle: 'bold',
+                          fontColor: ['#fff', '#fff'],
+                          precision: 2
+                      }
+                    ]
+                }
+            };
+
+            var gradeChart = new Chart(gctx, {
+                type: 'doughnut',
+                data: data,
+                options: chartOptions
+            });
+        }
+
+        var terms = @Html.Raw(Model.TermNames);
+        var catLowest = @Model.CatLowScores;
+        var catAverages = @Model.CatAvgScores;
+        var catHighest = @Model.CatHighScores;
+        function ShowCategoryChart(){
+
+            var cctx = $("#categoryChart");
+
+            var categoryChart = new Chart(cctx, {
+                type: 'bar',
+                data: {
+                    labels: terms,
+                    datasets: [{
+                        label: 'Lowest',
+                        data: catLowest,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255,99,132,1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Average',
+                        data: catAverages,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Highest',
+                        data: catHighest,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    title:{
+                        display: true,
+                        fontSize: 14,
+                        fontColor: '#000',
+                        text: 'Subject Category Performance by Terms'
+                    },
+                    animation: false,
+                    devicePixelRatio: 2,
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                autoSkip: false
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero:true,
+                                max: 100
+                            }
+                        }]
+                    },
+                    plugins: {
+                        labels: [
+                          {
+                              render: 'value',
+                              fontSize: 10
+                          }
+                        ]
+                    }
+
+                }
+            });
+        }
+    </script>
+}
+

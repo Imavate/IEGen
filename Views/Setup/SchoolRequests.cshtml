@@ -1,0 +1,182 @@
+﻿@model IEGen.Models.SchoolRequestPageViewModel
+@{
+    ViewBag.Title = "School Requests";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            School Details
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            @if (Model.HeaderViewModel.IsAppAdmin)
+            {
+                @Html.ActionLink("Change School", "Schools", "Admin", null, new { @class = "pull-right titlelink" })
+            }
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Name</label>
+            <p class="control-static">@Model.Name</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Location</label>
+            <p class="control-static">@Model.LocationName</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-md-6">
+            <label class="control-label">Address</label>
+            <p class="control-static">@Model.Address</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth"></div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Type</label>
+            <p class="control-static">@Model.Type</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Email</label>
+            <p class="control-static">@Model.Email</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth visible-sm"></div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Phone</label>
+            <p class="control-static">@Model.Phone</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Status</label>
+            <p class="control-static">@Model.Status</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="clearboth"></div>
+        <div class="col-xs-12">
+            <label class="control-label">Write Up</label>
+            <p class="control-static">@Model.WriteUp</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">School Requests</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="stDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="stDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                @Html.ActionLink("View Terms", "School", "Setup", null, new { @class = "btn btn-default hidden-xs" })
+            </div>
+        </div>
+        <table id="stDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Contact Person</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody id="stDTBody">
+                @foreach (var ag in Model.Requests)
+                {
+                    <tr>
+                        <td>@ag.RequestDateStr</td>
+                        <td>@ag.ContactPerson</td>
+                        <td>@ag.Notes</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center">
+            @Html.ActionLink("View Terms", "School", "Setup", null, new { @class = "btn btn-default" })
+        </span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#stDT';
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("stDT");
+
+            var editSchoolUrl = "@Url.Action("_EditSchool", "Admin")";
+            var schoolID = "@Model.HeaderViewModel.SchoolID";
+            $('#EditBtn').click(function () {
+
+                $.ajax({
+                    url: editSchoolUrl,
+                    data: { SchoolID: schoolID },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function ActionSuccess(data) {
+
+            RefreshPage();
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+    </script>
+}
+
+

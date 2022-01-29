@@ -1,0 +1,188 @@
+﻿@model IEGen.Models.FloatingStudentsPageViewModel
+@{
+    ViewBag.Title = "Uploaded Students";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Uploaded Students
+
+            @if (Model.HeaderViewModel.IsAppAdmin)
+            {
+                @Html.ActionLink("Change School", "Schools", "Admin", null, new { @class = "pull-right titlelink" })
+            }
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">School Name</label>
+            <p class="control-static">@Model.SchoolName</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">School Type</label>
+            <p class="control-static">@Model.SchoolType</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Location</label>
+            <p class="control-static">@Model.LocationName</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">Students without Classes</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="ptDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="ptDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <table id="ptDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Code</th>
+                    <th>Surname</th>
+                    <th>First Name</th>
+                    <th>Sex</th>
+                    <th>Year</th>
+                    <th>Level</th>
+                    <th># Results</th>
+                </tr>
+            </thead>
+            <tbody id="ptDTBody">
+                @foreach (var ag in Model.StudentList)
+                {
+                    <tr id="@ag.StudentID">
+                        <td><button class="btn btn-default btn-xs eDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td><button class="btn btn-default btn-xs ptDTBtn" title="view"><i class="fa fa-search"></i></button></td>
+                        <td>@ag.StudentCode</td>
+                        <td>@ag.Surname</td>
+                        <td>@ag.FirstName</td>
+                        <td>@ag.Sex</td>
+                        <td>@ag.MaxYear</td>
+                        <td>@ag.LevelName</td>
+                        <td>@ag.ResultCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+
+    <script type="text/javascript">
+
+        var tbID = '#ptDT';
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("ptDT");
+
+            var editUrl = "@Url.Action("_EditFloatingStudent", new { DefTermID = Model.DefTermID })";
+            var defTermName = "@Model.DefTermName";
+            $(tbID).on("click", '.eDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { StudentID: $(this.parentNode.parentNode).attr('id'), DefTermName: defTermName },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeFloatingEdit();
+                     }
+                 });
+            });
+
+            var viewUrl = "@Url.Action("StudentView", new { StudentID = "123" })";
+            $(tbID).on("click", '.ptDTBtn', function () {
+
+                window.location = viewUrl.replace("123", $(this.parentNode.parentNode).attr('id'));
+            });
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function ActionSuccess(data) {
+
+            window.location = window.location;
+        }
+
+        var updateFloatingUrl = '@Url.Action("UpdateFloatingStudent")';
+        function InitializeFloatingEdit() {
+
+            InitializeDatePicker("BirthDate");
+
+            var options = {
+                type: "POST",
+                url: updateFloatingUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UpdateForm').ajaxForm(options);
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+    </script>
+}
+
+

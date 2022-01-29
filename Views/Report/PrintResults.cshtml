@@ -1,0 +1,516 @@
+﻿@model IEGen.Models.StudentReportPageViewModel
+@{
+    Layout = "~/Views/Shared/_PrintLayout.cshtml";
+    ViewBag.Title = "Student Report - " + Model.Name;
+
+    var cnt = 0;
+}
+
+@foreach (var rep in Model.Reports)
+{
+    if (cnt > 0)
+    {
+        <div style="page-break-before: always;"></div>
+    }
+
+    cnt++;
+
+    var tabClass = rep.ScoreCount > 12 ? "scoreprint" : "";
+    var chartHeight = rep.HasSkills ? "280" : "335";
+    var chartHeightPx = chartHeight + "px";
+    var comPad = rep.HasSkills ? "pad-b5" : "form-pad";
+
+    <div class="panel panel-default" style="width:730px;">
+        <div class="form-panel-body row flexrow" style="padding-top:2px;">
+            <div style="width:125px; padding:0px 2px; border-right:1px solid #ddd;">
+                <img height="120" width="120" class="img-responsive" src="@rep.LogoSrc" />
+            </div>
+            <div style="width:478px; padding:0;">
+                <div style="font-size:16px; font-weight:bold; color:blue !important; text-align:center">@rep.SchoolName</div>
+                <div class="fm-sp"></div>
+
+                <div style="text-align:center">
+                    <div style="display:inline-block">
+                        <div class="flexrow">
+                            <div class="div">
+                                <label class="control-label">Name: </label>
+                                <span class="control-static">@rep.DisplayName</span>
+                            </div>
+                            @if (rep.ShowCode)
+                            {
+                                <div class="div">
+                                    <label class="control-label">Code: </label>
+                                    <span class="control-static">@rep.Code</span>
+                                </div>
+                            }
+                            <div class="div">
+                                <label class="control-label">Class: </label>
+                                <span class="control-static">@rep.ClassName</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fm-sp"></div>
+                <div class="pad-t5" style="border-bottom:1px solid #ddd"></div>
+                <div class="fm-sp"></div>
+                <div class="row" style="padding:0 2px;">
+                    <div class="col-xs-2">
+                        <label class="control-label">Lowest</label>
+                        <p class="control-static">@rep.LowStr</p>
+                        <div class="fm-sp"></div>
+                    </div>
+                    <div class="col-xs-2">
+                        <label class="control-label">Average</label>
+                        <p class="control-static">@rep.AvgStr</p>
+                        <div class="fm-sp"></div>
+                    </div>
+                    <div class="col-xs-2">
+                        <label class="control-label">Highest</label>
+                        <p class="control-static">@rep.HighStr</p>
+                        <div class="fm-sp"></div>
+                    </div>
+                    <div class="col-xs-3">
+                        @if (rep.ShowPosition)
+                        {
+                            <label class="control-label">Position</label>
+                            <p class="control-static">@Html.Raw(rep.PosFull)</p>
+                        }
+                        else
+                        {
+                            <label class="control-label">Improvement</label>
+                            <p class="control-static">@Html.Raw(rep.ImpFull)</p>
+                        }
+                        <div class="fm-sp"></div>
+                    </div>
+                    <div class="col-xs-3">
+                        <label class="control-label">Best Subject</label>
+                        <p class="control-static">@rep.BestSubjectName</p>
+                        <div class="fm-sp"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="width:125px; padding:0px 2px; border-left:1px solid #ddd;">
+                <img height="120" width="120" class="img-responsive pull-right" src="@rep.PhotoSrc" />
+            </div>
+        </div>
+
+        <div class="zero-panel-body row">
+            <div class="col-xs-5 wide-right">
+                <div class="panel panel-info">
+                    <div class="panel-heading info-heading">@rep.TermName Results</div>
+                    <div class="table-panel-body defprint">
+                        <table class="table table-bordered table-striped fullwidth defprint @tabClass" style="margin-bottom:0">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>CA [@rep.CAWeight]</th>
+                                    <th>Exam [@rep.ExamWeight]</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var s in rep.Scores)
+                                {
+                                    var CAStyle = s.DisplayCA < rep.CARedLine ? "color:#ff0000 !important;" : "";
+                                    var ExamStyle = s.DisplayExam < rep.ExamRedLine ? "color:#ff0000 !important;" : "";
+                                    var TotalStyle = s.Total < rep.RedLine ? "color:#ff0000 !important;" : "";
+                                <tr>
+                                    <td style="background-color:#ddeeff !important;"><b>@s.ResultName</b></td>
+                                    <td><span style="@CAStyle">@s.CAStr</span></td>
+                                    <td><span style="@ExamStyle">@s.ExamStr</span></td>
+                                    <td style="background-color:#f9f2b3 !important;"><b style="@TotalStyle">@s.TotalStr</b></td>
+                                    @*<td>@s.CAStr</td>
+                                    <td>@s.ExamStr</td>
+                                    <td style="background-color:#f9f2b3 !important;"><b>@s.TotalStr</b></td>*@
+                                    <td style="background-color:#f9f2b3 !important;">
+                                        @if (rep.ShowSummaryGrade)
+                                        {
+                                            <b>@s.SummaryGrade</b>
+                                        }
+                                        else
+                                        {
+                                            <b>@s.GradeName</b>
+                                        }
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-7 wide-left2">
+                @if (rep.ShowCategoryAnalysis)
+                {
+                    <div class="panel panel-info">
+                        <div class="panel-heading info-heading">Subject Category Performance</div>
+                        <div class="zero-panel-body">
+                            <div style="width:420px;height:@chartHeightPx;">
+                                <canvas id="@rep.CategoryChartID" width="420" height="@chartHeight" class="catCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="panel panel-info">
+                        <div class="panel-heading info-heading">@rep.YearStr [1st, 2nd and 3rd Term] Results</div>
+                        <div class="table-panel-body">
+                            <table class="table table-bordered table-striped fullwidth defprint @tabClass" style="margin-bottom:0">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>1st</th>
+                                        <th>2nd</th>
+                                        <th>3rd</th>
+                                        <th></th>
+                                        <th>Year Avg.</th>
+                                        @if (!rep.HideClassAverage)
+                                        {
+                                            <th>Class Avg.</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in rep.YearSubjects)
+                                    {
+                                        <tr>
+                                            <td style="background-color:#ddeeff !important;"><b>@s.Name</b></td>
+                                            <td>@s.Term1Str</td>
+                                            <td>@s.Term2Str</td>
+                                            <td>@s.Term3Str</td>
+                                            <td>
+                                                @s.ImpStr
+
+                                                @if (s.Improved)
+                                                {
+                                                    <span style="color: green !important;"><i class="fa fa-arrow-up"></i></span>
+                                                }
+
+                                                @if (s.Declined)
+                                                {
+                                                    <span style="color: #999 !important;"><i class="fa fa-arrow-down"></i></span>
+                                                }
+                                            </td>
+                                            <td style="background-color:#f9f2b3 !important;"><b>@s.YearAvgStr</b></td>
+                                            @if (!rep.HideClassAverage)
+                                            {
+                                                <td>@s.ClassAvgStr</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <div class="zero-panel-body row ">
+            <div class="col-xs-10 wide-right">
+                <div style="width:610px;height:@chartHeightPx;">
+                    <canvas id="@rep.ChartID" width="610" height="@chartHeight"></canvas>
+                </div>
+            </div>
+            <div class="col-xs-2 wide-left2">
+                <div class="panel panel-default">
+                    <div class="panel-heading info-heading">Grading Guide</div>
+                    <div class="table-panel-body">
+                        <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                            <tbody>
+                                @foreach (var g in rep.GradeRows)
+                                {
+                                    <tr>
+                                        <td>@g.LowerBound - @g.UpperBound</td>
+                                        <td>@g.Name</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (rep.HasSkills)
+        {
+            <div class="table-panel-body row">
+                <div class="col-xs-4 wide-right">
+                    <div class="panel panel-default">
+                        <div class="panel-heading info-heading">Qualitative Skills and Attributes</div>
+                        <div class="table-panel-body">
+                            <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                                <tbody>
+                                    <tr>
+                                        <td>@rep.Skill1</td>
+                                        <td>@rep.SkillScore1</td>
+                                        <td>@rep.SkillGrade1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>@rep.Skill2</td>
+                                        <td>@rep.SkillScore2</td>
+                                        <td>@rep.SkillGrade2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4 wide">
+                    <div class="panel panel-default">
+                        <div class="panel-heading info-heading">Qualitative Skills and Attributes</div>
+                        <div class="table-panel-body">
+                            <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                                <tbody>
+                                    <tr>
+                                        <td>@rep.Skill3</td>
+                                        <td>@rep.SkillScore3</td>
+                                        <td>@rep.SkillGrade3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>@rep.Skill4</td>
+                                        <td>@rep.SkillScore4</td>
+                                        <td>@rep.SkillGrade4</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-4 wide-left">
+                    <div class="panel panel-default">
+                        <div class="panel-heading info-heading">Qualitative Skills and Attributes</div>
+                        <div class="table-panel-body">
+                            <table class="table table-bordered table-striped fullwidth defprint" style="margin-bottom:0">
+                                <tbody>
+                                    <tr>
+                                        <td>@rep.Skill5</td>
+                                        <td>@rep.SkillScore5</td>
+                                        <td>@rep.SkillGrade5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>@rep.Skill6</td>
+                                        <td>@rep.SkillScore6</td>
+                                        <td>@rep.SkillGrade6</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <hr class="hr-b10" style="border-color:#999;margin-top:5px;" />
+        }
+
+        <div class="wide-panel-body defprint">
+            @if (rep.HasTeacherComment)
+            {
+                <div class="div @comPad">
+                    <label class="control-label">Teacher's Comment: </label>
+                    <span class="control-static">@rep.TeacherComment</span>
+                </div>
+            }
+            <div class="div sp-t5 @comPad">
+                <label class="control-label">@rep.PrincipalCommentText </label>
+                <span class="control-static">@rep.PrincipalComment</span>
+            </div>
+            <div class="div sp-t5 @comPad">
+                <label class="control-label">Next Term Resumes: </label>
+                <span class="control-static">@rep.NRDateStr</span>
+            </div>
+        </div>
+        <div class="zero-panel-body row">
+            <div class="col-xs-12">
+                <div style="padding:0 1px 0 3px; background-color:#ddd !important; margin:2px; font-size:9px;">
+                    <span>&copy; @DateTime.Now.Year Imavate Education</span>
+                    <span style="margin-left:75px;">Improving Student Academic Performance through Research and Statistical Analysis</span>
+                    <div class="pull-right" style="margin-top: -15px;">
+                        <img height="25" width="109" src="~/Content/Images/logo_tight.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/chart")
+
+    @foreach (var rep in Model.Reports)
+    {
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+
+                var subjects = @Html.Raw(rep.SubjectNames);
+                var lowScores = @rep.LowScoresJson;
+                var avgScores = @rep.AvgScoresJson;
+                var bestScores = @rep.MaxScoresJson;
+                var scores = @rep.ScoresJson;
+                var failure = @rep.FailureLine;
+                var chartText = 'Subject Performance Summary';
+
+                var sctx = document.getElementById("@rep.ChartID");
+
+                var scoreChart = new Chart(sctx, {
+                    type: 'bar',
+                    data: {
+                        labels: subjects,
+                        datasets: [{
+                            label: 'Student Scores',
+                            data: scores,
+                            backgroundColor: 'rgba(75, 220, 75, 0.2)',
+                            borderColor: 'rgba(75, 220, 75, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pass Mark',
+                            data: failure,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(255, 0, 0, 1)',
+                            borderWidth: 1,
+                            pointRadius:0,
+                            type: 'line'
+                        },
+                        {
+                            label: 'Lowest',
+                            data: lowScores,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(120,120,120,1)',
+                            borderWidth: 2,
+                            type: 'line'
+                        },
+                        {
+                            label: 'Average',
+                            data: avgScores,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(255, 165, 0, 1)',
+                            borderWidth: 2,
+                            type: 'line'
+                        },
+                        {
+                            label: 'Highest',
+                            data: bestScores,
+                            backgroundColor: 'rgba(255,255,255, 0)',
+                            borderColor: 'rgba(0, 0, 255, 1)',
+                            borderWidth: 2,
+                            type: 'line'
+                        }]
+                    },
+                    options: {
+                        title:{
+                            display: true,
+                            fontSize: 14,
+                            fontColor: '#000',
+                            text: chartText
+                        },
+                        animation: false,
+                        devicePixelRatio: 2,
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    autoSkip: false
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true,
+                                    max: 100
+                                }
+                            }]
+                        },
+                        plugins: {
+                            labels: [
+                              {
+                                  render: 'value',
+                                  fontSize: 0
+                              }
+                            ]
+                        }
+
+                    }
+                });
+                
+
+
+                if ($("#" + "@rep.CategoryChartID").hasClass("catCanvas")) {
+
+                    var categories = @Html.Raw(rep.CategoryNames);
+                    var lowAverages = @rep.CatLowAverages;
+                    var meanAverages = @rep.CatMeanAverages;
+                    var bestAverages = @rep.CatBestAverages;
+
+                    var cctx = document.getElementById("@rep.CategoryChartID");
+
+                    var categoryChart = new Chart(cctx, {
+                        type: 'bar',
+                        data: {
+                            labels: categories,
+                            datasets: [{
+                                label: 'Lowest',
+                                data: lowAverages,
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255,99,132,1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Average',
+                                data: meanAverages,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Highest',
+                                data: bestAverages,
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                borderColor: 'rgba(153, 102, 255, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            title: { display: false },
+                            animation: false,
+                            devicePixelRatio: 2,
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        autoSkip: false
+                                    }
+                                }],
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true,
+                                        max: 100
+                                    }
+                                }]
+                            },
+                            plugins: {
+                                labels: [
+                                    {
+                                        render: 'value',
+                                        fontSize: 0
+                                    }
+                                ]
+                            }
+
+                        }
+                    });
+                }
+            });
+
+
+
+
+        </script>
+    }
+
+}

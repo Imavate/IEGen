@@ -1,0 +1,194 @@
+﻿@model IEGen.Models.OtherExamsPageViewModel
+@{
+    ViewBag.Title = "Other Exams";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Other Exams
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default addBtn">Add New</button>
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="25">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th title="Number of Subjects"># Sub.</th>
+                    <th title="Number of Pupil Results"># Res.</th>
+                    <th title="Lowest Average">Low Avg.</th>
+                    <th title="Mean Average">Mean Avg.</th>
+                    <th title="Best Average">Best Avg.</th>
+                    <th>Best Student</th>
+                    <th>Best Subject</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.Exams)
+                {
+                <tr id="@ag.OtherExamID">
+                    <td><button class="btn btn-warning btn-xs rgDTBtn" title="Regenerate Results"><i class="fa fa-cog"></i></button></td>
+                    <td><button class="btn btn-default btn-xs bsDTBtn" title="score broadsheet"><i class="fa fa-table"></i></button></td>
+                    <td><button class="btn btn-info btn-xs fbsDTBtn" title="score and grade broadsheets"><i class="fa fa-table"></i></button></td>
+                    <td><button class="btn btn-primary btn-xs srDTBtn" title="student results"><i class="fa fa-user-graduate"></i></button></td>
+                    <td><button class="btn btn-default btn-xs srzDTBtn" title="zipped student results"><i class="fa fa-file-archive"></i></button></td>
+                    <td>@ag.Name</td>
+                    <td>@ag.ClassName</td>
+                    <td>@ag.SubjectCount</td>
+                    <td>@ag.ResultCount</td>
+                    <td>@ag.LowAvgStr</td>
+                    <td>@ag.MeanAvgStr</td>
+                    <td>@ag.BestAvgStr</td>
+                    <td>@ag.BestStudentName</td>
+                    <td>@ag.BestSubjectName</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#clDT';
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("clDT");
+
+            var addUrl = "@Url.Action("_StartOtherExam", new { TermID = Model.TermID, SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('.addBtn').click(function () {
+
+                $.ajax({
+                    url: addUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        focusText();
+                    }
+                });
+            });
+
+            var analyzeUrl = "@Url.Action("_ReanalyzeOtherExam")";
+            $(tbID).on("click", '.rgDTBtn', function () {
+
+                $.ajax({
+                    url: analyzeUrl,
+                    data: { ExamID: $(this.parentNode.parentNode).attr('id') },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        focusText();
+                    }
+                });
+            });
+
+            var broadsheetUrl = "@Url.Action("PrintOtherExamBroadsheet", new { ExamID = "123" })";
+            $(tbID).on("click", '.bsDTBtn', function () {
+
+                window.open(broadsheetUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank');
+            });
+
+            var fbsUrl = "@Url.Action("PrintOtherExamFullBroadsheet", new { ExamID = "123" })";
+            $(tbID).on("click", '.fbsDTBtn', function () {
+
+                window.open(fbsUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank');
+            });
+
+            var resultUrl = "@Url.Action("PrintOtherExamResults", new { ExamID = "123" })";
+            $(tbID).on("click", '.srDTBtn', function () {
+
+                window.open(resultUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank');
+            });
+
+            var resultUrl = "@Url.Action("PrintOtherExamResultsZip", new { ExamID = "123" })";
+            $(tbID).on("click", '.srzDTBtn', function () {
+
+                window.open(resultUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank');
+            });
+
+        });
+
+        function ShowModal(content) {
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal() {
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function focusText() {
+            $(document).one('shown.bs.modal', '#PViewModal', function () {
+                $('.ftext:first').focus();
+            });
+        }
+
+    </script>
+}
+

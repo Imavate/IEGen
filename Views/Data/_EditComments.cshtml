@@ -1,0 +1,82 @@
+﻿@model IEGen.Models.CommentsViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Edit Faculty Comments</h4>
+    </div>
+    <div id="BodyDiv">
+        @using (Ajax.BeginForm("UpdateFacultyComments", "Data", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr)",
+                                    OnSuccess = "ActionSuccess"
+                                },
+                                new { @class = "modal-body form-panel-body", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.StudentID)
+            @Html.HiddenFor(m => m.ClassID)
+            @Html.HiddenFor(m => m.DisplayName)
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <p><img height="120" width="120" class="img-responsive" src="@Model.PhotoSrc" title="@Model.DisplayName" /></p>
+                </div>
+                <div class="col-sm-6">
+                    <label class="control-label">Student</label>
+                    <p class="control-static">@Model.DisplayName</p>
+                    <div class="fm-sp"></div>
+
+                    <label class="control-label">Sex</label>
+                    <p class="control-static">@Model.Sex</p>
+                    <div class="fm-sp"></div>
+
+                    <label class="control-label">Class</label>
+                    <p class="control-static">@Model.ClassName</p>
+                    <div class="fm-sp"></div>
+                </div>
+            </div>
+
+            @Html.LabelFor(m => m.TeacherComment, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.TeacherComment)</span>
+            @Html.TextAreaFor(m => m.TeacherComment, 3, 50, new { @class = "form-control fm-sp" })
+
+            @Html.LabelFor(m => m.PrincipalComment, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.PrincipalComment)</span>
+            @Html.TextAreaFor(m => m.PrincipalComment, 3, 50, new { @class = "form-control fm-sp" })
+
+            if (Model.HasResult)
+            {
+                <div class="panel panel-info">
+                    <div class="panel-heading"><h4 class="panel-title">Comments on Result</h4></div>
+                    <div class="wide-panel-body">
+                        <label class="control-label">Teacher's Comment</label>
+                        <p class="control-static">@Model.CTComment</p>
+                        <div class="fm-sp"></div>
+
+                        <label class="control-label">Principal's Comment</label>
+                        <p class="control-static">@Model.PComment</p>
+                        <div class="fm-sp"></div>
+
+                        <div class="fm-sp pad-t5">
+                            <div class="checkbox cb-btm5">
+                                <label>@Html.CheckBoxFor(m => m.UpdateResult) Update Result Comments?</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <input type="submit" id="SubmitBtn" style="display:none" />
+        }
+
+        <div class="modal-footer">
+            <div id="MsgDiv"></div>
+            <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+            <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Save Changes</button>
+
+        </div>
+    </div>
+</div>

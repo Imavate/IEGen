@@ -1,0 +1,277 @@
+﻿@model IEGen.Models.CTeacherPageViewModel
+@{
+    ViewBag.Title = "Check Teachers";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">Check Teachers</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="uDTSSSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="uDTSSSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <button id="uDTSS_FiltersBtn" class="btn btn-default">More Filters</button>
+                <button type="button" class="btn btn-default uAddBtn">Add New</button>
+
+                <button type="button" class="btn btn-default pull-right export"><i class="fa fa-file-excel"></i> Export All</button>
+            </div>
+        </div>
+        <div id="uDTSS_FiltersRow" class="filter-div" style="display:none">
+            <div class="panel panel-primary">
+                <div class="row filter-row">
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Location</label>
+                        @Html.DropDownListFor(m => m.LocationFilter, Model.LocationList, "-- All Locations --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">State</label>
+                        @Html.EnumDropDownListFor(m => m.StateFilter, "-- All States --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">School Type</label>
+                        @Html.EnumDropDownListFor(m => m.SchoolTypeFilter, "-- All Types --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Sex</label>
+                        @Html.EnumDropDownListFor(m => m.SexFilter, "-- All Sexes --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Experience (Years) From</label>
+                        @Html.TextBoxFor(m => m.YearFromFilter, new { @class = "form-control", type = "number" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Experience (Years) To</label>
+                        @Html.TextBoxFor(m => m.YearToFilter, new { @class = "form-control", type = "number" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Max. Qualification</label>
+                        @Html.EnumDropDownListFor(m => m.DegreeFilter, "-- All Qualifications --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Status</label>
+                        @Html.EnumDropDownListFor(m => m.RegFilter, "-- Every Status --", new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table id="uDTSS" class="table table-hover table-bordered fullwidth" data-order="[]"></table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var tbID = '#uDTSS';
+
+        $(document).ready(function () {
+
+            var columns = [{
+                "title": "",
+                "data": "Button",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "#",
+                "data": "CTeacherID",
+                "searchable": true
+            },
+            {
+                "title": "Name",
+                "data": "Name",
+                "searchable": true
+            },
+            {
+                "title": "Email",
+                "data": "Email",
+                "searchable": true
+            },
+            {
+                "title": "Phone",
+                "data": "Phone",
+                "searchable": true
+            },
+            {
+                "title": "Sex",
+                "data": "Sex",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Max. Degree",
+                "data": "MaxDegreeName",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "School Type",
+                "data": "SchoolType",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Location",
+                "data": "LocationDesc",
+                "searchable": false,
+                "orderable": false
+            },
+            {
+                "title": "Status",
+                "data": "RegStatus",
+                "searchable": true
+            }];
+
+            var nodata = function (data) { };
+
+            var uDTSS_data = function (data) {
+                data.LocationID = $("#LocationFilter").val();
+                data.TypeID = $("#TypeFilter").val();
+                data.StateID = $("#StateFilter").val();
+                data.SexID = $("#SexFilter").val();
+                data.YearFrom = $("#YearFromFilter").val();
+                data.YearTo = $("#YearToFilter").val();
+                data.DegreeID = $("#DegreeFilter").val();
+                data.RegID = $("#RegFilter").val();
+            };
+
+            MyDTBtnInitSS("uDTSS", "@Url.Action("GetCTeacherList", "Admin", null)", columns, uDTSS_data);
+
+
+            //for server side... no auto post back
+            $("#uDTSSSearchBox").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    $("#uDTSSSearchBtn").click();
+                }
+            });
+
+            $('#uDTSS_FiltersBtn').click(function () {
+                $('#uDTSS_FiltersRow').toggle();
+
+                if ($("#LocationFilter").val() != "" || $("#SchoolTypeFilter").val() != "" || $("#StateFilter").val() != "" || $("#SexFilter").val() != "" ||
+                    $("#YearFromFilter").val() != "" || $("#YearToFilter").val() != "" || $("#DegreeFilter").val() != "" || $("#RegFilter").val() != "")
+                    $('#uDTSS_FiltersBtn').html('More Filters <i class="fa fa-filter fa-lg text-primary"></i>');
+                else
+                    $('#uDTSS_FiltersBtn').html("More Filters");
+
+                //going from open to close... note that toggle has already been called
+                if ($('#uDTSS_FiltersRow').css('display') === 'none') {
+                    $("#uDTSSSearchBtn").click();
+                }
+            });
+
+            var addCTeacherUrl = "@Url.Action("_AddCTeacher")";
+            $('.uAddBtn').click(function () {
+
+                $.ajax({
+                    url: addCTeacherUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var editCTeacherUrl = "@Url.Action("_EditCTeacher")";
+            $(tbID).on("click", '.uDTBtn', function () {
+
+                 $.ajax({
+                     url: editCTeacherUrl,
+                     data: { CTeacherID: $(this).data('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                     }
+                 });
+            });
+
+            $('.export').click(function () {
+
+                $("#uDTSSSearchBtn").click();
+                Download();
+
+            });
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function EnableEmailEdit() {
+            $('#Email').css("pointer-events", "");
+            $('#Email').focus();
+        }
+
+        function ActionSuccess(data) {
+
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+
+            $(tbID).DataTable().ajax.reload();
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+        var downloadUrl = "@Url.Action("_DownloadCTeachers")";
+        function Download() {
+
+            var locid = $("#LocationFilter").val();
+            var typeid = $("#SchoolTypeFilter").val();
+            var stateid = $("#StateFilter").val();
+            var sexid = $("#SexFilter").val();
+            var yfid = $("#YearFromFilter").val();
+            var ytid = $("#YearToFilter").val();
+            var degid = $("#DegreeFilter").val();
+            var regid = $("#RegFilter").val();
+            var search = $("#uDTSSSearchBox").val();
+
+            var data = {
+                LocationID: locid, SchoolTypeID: typeid, StateID: stateid, SexID: sexid, YearFrom: yfid, YearTo: ytid, DegreeID: degid, RegID: regid, Search: search
+            };
+
+            window.location = downloadUrl + '?' + $.param(data);
+
+        }
+
+    </script>
+}

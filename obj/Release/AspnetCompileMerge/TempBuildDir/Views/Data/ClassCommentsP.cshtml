@@ -1,0 +1,147 @@
+﻿@model IEGen.Models.ClassCommentsPageViewModel
+@{
+    ViewBag.Title = Model.Name + " Principal Comments";
+}
+
+<div id="AlertDiv"></div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <b>@Model.Name</b> Principal Comments
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        @using (Ajax.BeginForm("SaveClassCommentsP", "Data", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtn', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtn', 'Save Changes', 'AlertDiv', xhr)",
+                                    OnSuccess = "RestoreElementShowAlert('SubmitBtn', 'Save Changes', 'AlertDiv', xhr)"
+                                },
+                                new { role = "form" }))
+        {
+            @Html.HiddenFor(m => m.ClassID)
+            @Html.HiddenFor(m => m.Name)
+            <table id="csDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+                <thead>
+                    <tr>
+                        <th data-orderable="false" data-searchable="false"></th>
+                        <th>Student</th>
+                        <th>Principal's Comment</th>
+                    </tr>
+                </thead>
+                <tbody id="csDTBody">
+                    @for (int i = 0; i < Model.PComments.Count; i++)
+                    {
+                        var pm = Model.PComments[i];
+                        <tr id="@pm.StudentID">
+                            <td><button type="button" class="btn btn-default btn-xs csDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                            <td>@pm.DisplayName</td>
+                            <td width="100%" class="crel">
+                                @Html.HiddenFor(m => m.PComments[i].StudentID)
+                                <span class="rowval">@Html.ValidationMessageFor(m => m.PComments[i].PrincipalComment)</span>
+                                @if (i == 0)
+                                {
+                                    @Html.TextBoxFor(m => m.PComments[i].PrincipalComment, new { @class = "form-control extend ftext" })
+                                }
+                                else
+                                {
+                                    @Html.TextBoxFor(m => m.PComments[i].PrincipalComment, new { @class = "form-control extend" })
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <button id="SubmitBtn" class="btn btn-success bts">Save Changes</button>
+
+            @Html.ActionLink("All Comments", "PrincipalComments", null, new { @class = "btn btn-default bts" })
+
+            <button type="button" id="ClearBtn" class="btn btn-warning bts">Clear Comments</button>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+
+    <script type="text/javascript">
+
+        var tbID = '#csDT';
+        var classid = '@Model.ClassID';
+
+        $(document).ready(function () {
+
+            var editUrl = "@Url.Action("_EditComments", "Data")";
+            $(tbID).on("click", '.csDTBtn', function () {
+
+                $.ajax({
+                    url: editUrl,
+                    data: { StudentID: $(this.parentNode.parentNode).attr('id'), ClassID: classid },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        focusText();
+                    }
+                });
+            });
+
+            $('.ftext:first').focus();
+
+            $('#ClearBtn').click(function () {
+
+                $('.extend').val("");
+
+            });
+
+        });
+
+        function focusText() {
+            $(document).one('shown.bs.modal', '#PViewModal', function () {
+                $('#PComment').focus();
+            });
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+    </script>
+}
+
+

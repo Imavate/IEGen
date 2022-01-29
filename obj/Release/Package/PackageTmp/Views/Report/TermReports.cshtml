@@ -1,0 +1,249 @@
+﻿@model IEGen.Models.TermReportPageViewModel
+@{
+    ViewBag.Title = "Term Reports";
+}
+
+<div id="AlertDiv"></div>
+
+@if (Model.ShouldAnalyze)
+{
+    <div class="alert alert-info alert-dismissable" role="alert" style="display:none; margin-bottom:5px;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button id="AnalyzeBtn" class="btn btn-default alertBtn">Click here</button> <b> to run Term Performance Analysis</b>
+    </div>
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Term Details
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-xs-12 visible-xs">
+            <label class="control-label">Term</label>
+            <p class="control-static">@Model.TermName</p>
+            <div class="fm-sp"></div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label"># Classes</label>
+            <p class="control-static" id="pName">@Model.ClassCount</p>
+            <div class="fm-sp"></div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label"># Subjects</label>
+            <p class="control-static">@Model.DefSubjectCount</p>
+            <div class="fm-sp"></div>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label"># Students</label>
+            <p class="control-static">@Model.StudentCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Next Resumption Date</label>
+            <p class="control-static">@Model.NRDateStr</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+
+@if (Model.HasResults)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title">Term Performance</h4></div>
+        <div class="form-panel-body row">
+            <div class="col-sm-4 col-md-2">
+                <label class="control-label">Low. Avg.</label>
+                <p class="control-static">@Model.LowAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-4 col-md-2">
+                <label class="control-label">Mean Avg.</label>
+                <p class="control-static">@Model.MeanAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-4 col-md-2">
+                <label class="control-label">Best Avg.</label>
+                <p class="control-static">@Model.BestAvgStr</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="clearboth visible-sm"></div>
+
+            <div class="col-sm-4 col-md-2">
+                <label class="control-label"># Results</label>
+                <p class="control-static">@Model.ResultCount</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-8 col-md-4">
+                <label class="control-label">Best Student</label>
+                <p class="control-static">@Model.BestStudentName</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="clearboth"></div>
+
+            <div class="col-md-6">
+                <label class="control-label">Best Class</label>
+                <p class="control-static">@Model.BestClassName [@Model.BestClassAvgStr | @Model.BestClassSize Students]</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="clearboth visible-sm"></div>
+
+            <div class="col-sm-4 col-md-2">
+                <label class="control-label"># Subjects</label>
+                <p class="control-static">@Model.SubjectCount</p>
+                <div class="fm-sp"></div>
+            </div>
+
+            <div class="col-sm-8 col-md-4">
+                <label class="control-label">Best Subject</label>
+                <p class="control-static">@Model.BestSubjectName</p>
+                <div class="fm-sp"></div>
+            </div>
+        </div>
+        <hr class="sp-b0 sp-t0" />
+        <div class="form-panel-body sp-b5">
+            <button id="TermBtn" class="btn btn-default"><i class="fa fa-print"></i> Term Report</button>
+            <button id="CategoryBtn" class="btn btn-default"><i class="fa fa-print"></i> Subject Category Report</button>
+            <button id="LevelBtn" class="btn btn-default"><i class="fa fa-print"></i> Class Level Report</button>
+            <button id="BStudentBtn" class="btn btn-default"><i class="fa fa-print"></i> Best Student Report</button>
+            <button id="BSubjectBtn" class="btn btn-default"><i class="fa fa-print"></i> Best Subject Report</button>
+            <button id="AllTermsBtn" class="btn btn-default"><i class="fa fa-print"></i> All Terms Report</button>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><h4 class="panel-title">Subject Category Performance</h4></div>
+        <div class="wide-panel-body">
+            <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+                <thead>
+                    <tr>
+                        <th data-orderable="false" data-searchable="false"></th>
+                        <th>Name</th>
+                        <th title="Number of Subjectss"># Sub.</th>
+                        <th title="Number of Pupil Results"># Res.</th>
+                        <th title="Lowest Score">Lowest</th>
+                        <th title="Average Score">Average</th>
+                        <th title="Highest Score">Highest</th>
+                        <th>Best Subject</th>
+                        <th>Best Pupil</th>
+                    </tr>
+                </thead>
+                <tbody id="clDTBody">
+                    @foreach (var ag in Model.CategoryStats)
+                    {
+                    <tr id="@ag.CategoryID">
+                        <td><button class="btn btn-default btn-xs cpDTBtn" title="print report"><i class="fa fa-chart-bar text-primary"></i></button></td>
+                        <td>@ag.CategoryName</td>
+                        <td>@ag.SubjectCount</td>
+                        <td>@ag.ResultCount</td>
+                        <td>@ag.LowStr</td>
+                        <td>@ag.AvgStr</td>
+                        <td>@ag.HighStr</td>
+                        <td>@ag.BestSubjectName [@ag.BestSubAvgStr]</td>
+                        <td>@ag.BestStudentName [@ag.BestAvgStr]</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+
+        var userid = "@Model.HeaderViewModel.UserID";
+
+        $(document).ready(function () {
+
+            $('.alert').show(500);
+
+            var analyzeUrl = "@Url.Action("AnalyzeTerm", "Report", new { TermID = Model.TermID })";
+            $('#AnalyzeBtn').click(function () {
+                $.ajax({
+                    url: analyzeUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    success: function (r) {
+                        RefreshPage();
+                    }
+                });
+            });
+
+            var termUrl = "@Url.Action("PrintTermReport", "Report", new { TermID = Model.TermID })";
+            $('#TermBtn').click(function () {
+                window.open(termUrl, '_blank');
+            });
+
+            var termCatUrl = "@Url.Action("PrintTermCategoryReports", "Report", new { TermID = Model.TermID })";
+            $('#CategoryBtn').click(function () {
+                window.open(termCatUrl, '_blank');
+            });
+
+            var levUrl = "@Url.Action("PrintTermLevelReports", "Report", new { TermID = Model.TermID })";
+            $('#LevelBtn').click(function () {
+                window.open(levUrl, '_blank');
+            });
+
+            var resUrl = "@Url.Action("PrintStudentResult", "Report", new { StudentID = Model.BestStudentID, ClassID = Model.BestStudentClassID })";
+            $('#BStudentBtn').click(function () {
+                window.open(resUrl, '_blank');
+            });
+
+            var sresUrl = "@Url.Action("PrintSubjectReport", "Report", new { SubjectID = Model.BestSubjectID })";
+            $('#BSubjectBtn').click(function () {
+                window.open(sresUrl, '_blank');
+            });
+
+            var atUrl = "@Url.Action("PrintAllTermsReport", "Report", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('#AllTermsBtn').click(function () {
+                window.open(atUrl, '_blank');
+            });
+
+            var catUrl = "@Url.Action("PrintCategoryReport", "Report", new { SchoolID = Model.HeaderViewModel.SchoolID, CategoryID = 123 })";
+            $('#clDT').on("click", '.cpDTBtn', function () {
+                window.open(catUrl.replace("123", $(this.parentNode.parentNode).attr('id')), '_blank');
+            });
+
+
+        });
+    </script>
+}

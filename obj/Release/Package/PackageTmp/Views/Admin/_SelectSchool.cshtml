@@ -1,0 +1,36 @@
+﻿@model List<IEGen.Models.ChooseSchoolViewModel>
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">Add Request to Existing School</h4></div>
+    <div class="wide-panel-body">
+        <div class="input-group">
+            <input type="search" id="ssDTSearchBox" class="form-control" placeholder="Search for Entries" />
+            <span class="input-group-btn">
+                <button id="ssDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                    <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                </button>
+            </span>
+        </div>
+        <table id="ssDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-length-menu="[5,10,15,20]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody id="ssDTBody">
+                @foreach (var ag in Model)
+                {
+                    <tr id="@ag.SchoolID">
+                        <td><button class="btn btn-default btn-xs ssDTBtn" title="add"><i class="fa fa-plus"></i></button></td>
+                        <td>@ag.Name</td>
+                        <td>@ag.Type</td>
+                        <td>@ag.LocationDesc</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+﻿@model IEGen.Models.EditComplexResultFormatViewModel
+
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="PViewTitle">Edit EntryFormat</h4>
+    </div>
+    <div id="BodyDiv">
+        @using (Ajax.BeginForm("UpdateEntryFormat", "Setup", null,
+                                new AjaxOptions
+                                {
+                                    OnBegin = "AddCog('SubmitBtnO', ' Processing...')",
+                                    OnFailure = "RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr)",
+                                    OnSuccess = "EditSuccess"
+                                },
+                                new { @class = "modal-body form-panel-body", role = "form" }))
+        {
+            @Html.HiddenFor(m => m.FormatID)
+            @Html.HiddenFor(m => m.SchoolID)
+
+            <label class="control-label">Format</label>
+            <p class="control-static">@Model.Name</p>
+            <div class="fm-sp"></div>
+
+            @Html.LabelFor(m => m.CA1Weight, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.CA1Weight)</span>
+            @Html.TextBoxFor(m => m.CA1Weight, new { @class = "form-control fm-sp", type = "number" })
+
+            @Html.LabelFor(m => m.CA2Weight, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.CA2Weight)</span>
+            @Html.TextBoxFor(m => m.CA2Weight, new { @class = "form-control fm-sp", type = "number" })
+
+            @Html.LabelFor(m => m.CA3Weight, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.CA3Weight)</span>
+            @Html.TextBoxFor(m => m.CA3Weight, new { @class = "form-control fm-sp", type = "number" })
+
+            @Html.LabelFor(m => m.CA4Weight, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.CA4Weight)</span>
+            @Html.TextBoxFor(m => m.CA4Weight, new { @class = "form-control fm-sp", type = "number" })
+
+            @Html.LabelFor(m => m.ExamWeight, new { @class = "control-label" })
+            <span class="validation-msg">@Html.ValidationMessageFor(m => m.ExamWeight)</span>
+            @Html.TextBoxFor(m => m.ExamWeight, new { @class = "form-control fm-sp", type = "number" })
+
+            <input type="submit" id="SubmitBtn" style="display:none" />
+        }
+
+        <div class="modal-footer">
+            <div id="MsgDiv"></div>
+            <button type="button" class="btn btn-default bts" data-dismiss="modal" tabindex="-1">Close</button>
+
+            @if (Model.CanEdit)
+            {
+                using (Ajax.BeginForm("DeleteEntryFormat", "Setup", new { FormatID = Model.FormatID },
+                                        new AjaxOptions
+                                        {
+                                            OnBegin = "AddCog('DeleteBtnO', ' Processing...')",
+                                            OnFailure = "RestoreElementShowAlert('DeleteBtnO', 'Delete', 'MsgDiv', xhr)",
+                                            OnSuccess = "DeleteSuccess",
+                                            Confirm = "Do you really want to delete this Entry Format?"
+                                        },
+                                        new { role = "form", style = "display:none" }))
+                {
+                    <input type="submit" id="DeleteBtn" />
+                }
+
+                <button id="DeleteBtnO" class="btn btn-warning bts" onclick="return document.getElementById('DeleteBtn').click();">Delete</button>
+
+                <button id="SubmitBtnO" class="btn btn-success bts" onclick="return document.getElementById('SubmitBtn').click();">Save Changes</button>
+            }
+
+        </div>
+    </div>
+</div>

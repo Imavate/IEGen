@@ -1,0 +1,217 @@
+﻿@model IEGen.Models.PromotionCommentSetupViewModel
+@{
+    ViewBag.Title = "Promotion Comment Setup: " + Model.Name;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Promotion Comment Setup
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            @Html.ActionLink("View All", "PromotionComments", null, new { @class = "pull-right titlelink", title = "View all Groups" })
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-4">
+            <label class="control-label">Name</label>
+            <p class="control-static">@Model.Name</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-4">
+            <label class="control-label"># Classes</label>
+            <p id="ClassCount" class="control-static">@Model.ClassCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-4">
+            <label class="control-label">School</label>
+            <p class="control-static">@Model.SchoolName</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading hidden-xs"><h4 class="panel-title">Comments</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="pmDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="pmDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default hidden-xs pmAddBtn">Add New</button>
+            </div>
+        </div>
+        <table id="pmDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Lower Bound</th>
+                    <th>Upper Bound</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody id="pmDTBody">
+                @foreach (var pm in Model.CommentList)
+                {
+                    <tr id="@pm.CommentID">
+                        <td><button class="btn btn-default btn-xs pmDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td>@pm.LowerBound</td>
+                        <td>@pm.UpperBound</td>
+                        <td>@pm.Comment</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center"><button type="button" class="btn btn-primary pmAddBtn">Add New</button></span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+        var grpid = "@Model.GroupID";
+
+        var tbID = '#pmDT';
+        var editBtn = "<button class='btn btn-default btn-xs pmDTBtn' title='edit'><i class='fa fa-pencil-alt'></i></button>";
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("pmDT");
+
+            var addCommentUrl = "@Url.Action("_AddPromotionComment", "Setup", new { GroupID = Model.GroupID })";
+            $('.pmAddBtn').click(function () {
+
+                $.ajax({
+                    url: addCommentUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var editCommentUrl = "@Url.Action("_EditPromotionComment", "Setup")";
+            $(tbID).on("click", '.pmDTBtn', function () {
+
+                 $.ajax({
+                     url: editCommentUrl,
+                     data: { CommentID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                    }
+                });
+            });
+
+            var editGrpUrl = "@Url.Action("_EditPromotionCommentGroup", "Setup")";
+            $('#EditBtn').click(function () {
+                $.ajax({
+                    url: editGrpUrl,
+                    data: { GroupID: grpid },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function AddCommentSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.LowerBound, ag.UpperBound, ag.Comment];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.CommentID);
+        }
+
+        function EditCommentSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.LowerBound, ag.UpperBound, ag.Comment];
+
+            $(tbID).DataTable().row('#' + ag.CommentID).data(rowData).draw('page');
+        }
+
+        function DeleteCommentSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+        }
+
+        function EditGroupSuccess(data) {
+
+            RefreshPage();
+        }
+
+        var grpUrl = "@Url.Action("PromotionComments")";
+        function DeleteGroupSuccess(rowID) {
+
+            window.location = grpUrl;
+
+        }
+    </script>
+}
+
+

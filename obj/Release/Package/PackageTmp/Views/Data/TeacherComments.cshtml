@@ -1,0 +1,292 @@
+﻿@model IEGen.Models.CommentsPageViewModel
+@{
+    ViewBag.Title = "Class Teacher Comments";
+}
+
+<div id="AlertDiv"></div>
+
+@if (Model.HasScores)
+{
+    <div class="alert alert-warning alert-dismissable" role="alert" style="display:none; margin-bottom:5px;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        Scores have been entered for this Term. Please verify that you are in the right Term!
+    </div>
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Class Teacher Comments
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="cDTSSSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="cDTSSSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" id="cDTSS_FiltersBtn" class="btn btn-default">More Filters</button>
+
+                <div class="dropdown" style="display:inline-block">
+                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        <i class="fa fa-print"></i> Entry Sheets <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="PdfPrintBtn">Print PDF Sheets</a></li>
+                        <li><a href="#" id="ExcelBtn">Download Excel File</a></li>
+                    </ul>
+                </div>
+
+                <button type="button" id="UploadBtn" class="btn btn-default"><i class="fa fa-upload"></i> Upload Comments</button>
+
+                <button type="button" class="btn btn-default pull-right export"><i class="fa fa-file-excel"></i> Export All</button>
+            </div>
+        </div>
+        <div id="cDTSS_FiltersRow" class="filter-div">
+            <div class="panel panel-primary">
+                <div class="row filter-row">
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Class</label>
+                        @Html.DropDownListFor(m => m.ClassFilter, Model.ClassList, "-- All Classes --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Level</label>
+                        @Html.DropDownListFor(m => m.LevelFilter, Model.LevelList, "-- All Levels --", new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table id="cDTSS" class="table table-hover table-bordered fullwidth" data-order="[]"></table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+    @Scripts.Render("~/bundles/customval")
+
+    <script type="text/javascript">
+
+        var tbID = '#cDTSS';
+        var termID = '@Model.TermID';
+
+        $(document).ready(function () {
+
+            var columns = [{
+                "title": "",
+                "data": "EditButton",
+                "orderable": false
+            },
+            {
+                "title": "",
+                "data": "Button",
+                "orderable": false
+            },
+            {
+                "title": "Class",
+                "data": "ClassName"
+            },
+            {
+                "title": "Student",
+                "data": "DisplayName"
+            },
+            {
+                "title": "Sex",
+                "data": "Sex"
+            },
+            {
+                "title": "Class Teacher Comments",
+                "data": "TeacherComment"
+            }];
+
+            var nodata = function (data) { };
+
+            var cDTSS_data = function (data) {
+                data.TermID = termID;
+                data.ClassID = $("#ClassFilter").val();
+                data.LevelID = $("#LevelFilter").val();
+            };
+
+            MyDTBtnInitSS("cDTSS", "@Url.Action("GetCTCommentList", "Data", null)", columns, cDTSS_data);
+
+
+            //for server side... no auto post back
+            $("#cDTSSSearchBox").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    $("#cDTSSSearchBtn").click();
+                }
+            });
+
+            $('#cDTSS_FiltersBtn').click(function () {
+                $('#cDTSS_FiltersRow').toggle();
+
+                if ($("#ClassFilter").val() != "" || $("#LevelFilter").val() != "")
+                    $('#cDTSS_FiltersBtn').html('More Filters <i class="fa fa-filter fa-lg text-primary"></i>');
+                else
+                    $('#cDTSS_FiltersBtn').html("More Filters");
+
+                //going from open to close... note that toggle has already been called
+                if ($('#cDTSS_FiltersRow').css('display') === 'none') {
+                    $("#cDTSSSearchBtn").click();
+                }
+            });
+
+            var editUrl = "@Url.Action("_EditComments", "Data")";
+            $(tbID).on("click", '.eDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { StudentID: $(this).data('sid') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         focusText();
+                     }
+                 });
+            });
+
+            var entryUrl = "@Url.Action("ClassCommentsCT", new { ClassID = "123" })";
+            $(tbID).on("click", '.cDTBtn', function () {
+
+                window.location = entryUrl.replace("123", $(this).data('id'));
+            });
+
+            var pdfUrl = "@Url.Action("CommentSheetsP", new { TermID = Model.TermID, TypeID = Model.CommentTypeID })";
+            $('#PdfPrintBtn').click(function () {
+
+                window.open(pdfUrl, '_blank');
+            });
+
+            var excelUrl = "@Url.Action("CommentSheetsE", new { TermID = Model.TermID, TypeID = Model.CommentTypeID })";
+            $('#ExcelBtn').click(function () {
+
+                window.location = excelUrl;
+            });
+
+            var uploadUrl = "@Url.Action("_StartUploadComments", new { TermID = Model.TermID, TypeID = Model.CommentTypeID })";
+            $('#UploadBtn').click(function () {
+
+                 $.ajax({
+                     url: uploadUrl,
+                     data: { },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                         InitializeUpload();
+                     }
+                 });
+            });
+
+            $('.export').click(function () {
+
+                $("#cDTSSSearchBtn").click();
+                Download();
+
+            });
+        });
+
+        function focusText() {
+            $(document).one('shown.bs.modal', '#PViewModal', function () {
+                $('#CTComment').focus();
+            });
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function ActionSuccess(data) {
+
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+
+            $(tbID).DataTable().ajax.reload(null, false);
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+        var finishUploadUrl = '@Url.Action("UploadComments")';
+        function InitializeUpload() {
+
+            var options = {
+                type: "POST",
+                url: finishUploadUrl,
+                beforeSend: function (xhr) {
+                    AddCog('SubmitBtnO', ' Processing...');
+                },
+                error: function (xhr, status, error) {
+                    RestoreElementShowAlert('SubmitBtnO', 'Upload Scores', 'MsgDiv', xhr);
+                },
+                success: function (result, status, xhr) {
+                    ActionSuccess(result);
+                }
+            };
+
+            // pass options to ajaxForm (malsup jquery.form.js)
+            $('#UploadForm').ajaxForm(options);
+        }
+
+
+        var downloadUrl = "@Url.Action("_DownloadComments")";
+        function Download() {
+
+            var clid = $("#ClassFilter").val();
+            var lvid = $("#LevelFilter").val();
+            var search = $("#cDTSSSearchBox").val();
+
+            var data = {
+                TermID: termID, ClassID: clid, LevelID: lvid, Search: search
+            };
+
+            window.location = downloadUrl + '?' + $.param(data);
+
+        }
+
+    </script>
+}

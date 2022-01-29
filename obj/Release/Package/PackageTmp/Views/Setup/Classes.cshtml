@@ -1,0 +1,374 @@
+﻿@model IEGen.Models.ClassPageViewModel
+@{
+    ViewBag.Title = "Classes";
+}
+
+<div id="AlertDiv"></div>
+
+
+@if (Model.NoDefGradeGroup)
+{
+    <div class="alert alert-warning alert-dismissable" role="alert" style="display:none; margin-bottom:5px;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        @Html.ActionLink("Click here", "SchoolGrades", "Setup", null, new { @class = "alert-link" }) to set a default Grade Group for the School
+    </div>
+}
+
+@if (Model.IncompleteArms)
+{
+    <div class="alert alert-warning alert-dismissable" role="alert" style="display:none; margin-bottom:5px;">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        Class Arms are incomplete! @Html.ActionLink("Click here", "ClassArms", "Setup", null, new { @class = "alert-link" }) to create Class Arms for all Levels.
+    </div>
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Term Details
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            @Html.ActionLink("Change Term", "School", "Setup", null, new { @class = "pull-right titlelink" })
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Name</label>
+            <p class="control-static" id="pName">@Model.Name</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label"># Students</label>
+            <p class="control-static">@Model.StudentCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Next Resumption Date</label>
+            <p class="control-static" id="pNRDate">@Model.NRDateStr</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Days Opened</label>
+            <p class="control-static" id="pDOpened">@Model.DaysOpened</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+    <hr style="margin:0" />
+    <div class="form-panel-body row">
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Default Grade Group</label>
+            <p class="control-static">@Model.DefGradeGroup</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Default Skill Group</label>
+            <p class="control-static">@Model.DefSkillGroup</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Default Performance Comment Group</label>
+            <p class="control-static">@Model.DefPerformanceCommentGroup</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <label class="control-label">Default Improvement Comment Group</label>
+            <p class="control-static">@Model.DefImprovementCommentGroup</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h4 class="panel-title">Classes</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="clDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="clDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default clAddBtn">Add New</button>
+
+                @if (Model.IsFirstTerm)
+                {
+                    <button type="button" class="btn btn-default clImportOtherBtn">Import Classes</button>
+                }
+                else
+                {
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Import Classes <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="clImportBtn">From Current Session</a></li>
+                            <li><a href="#" class="clImportOtherBtn">From Previous Sessions</a></li>
+                        </ul>
+                    </div>
+                }
+
+                @Html.ActionLink("Import Students", "ImportStudents", "Setup", null, new { @class = "btn btn-default" })
+
+            </div>
+        </div>
+        <table id="clDT" class="table table-hover table-bordered fullwidth" data-order="[]" data-page-length="50">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Type</th>
+                    <th># Students</th>
+                    <th># Subjects</th>
+                    <th>CA</th>
+                    <th>Exam</th>
+                    <th>Grade Group</th>
+                </tr>
+            </thead>
+            <tbody id="clDTBody">
+                @foreach (var ag in Model.ClassList)
+                {
+                    <tr id="@ag.ClassID">
+                        <td><button class="btn btn-default btn-xs clDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td><button class="btn btn-warning btn-xs csDTBtn" title="setup"><i class="fa fa-wrench"></i></button></td>
+                        <td>@ag.Name</td>
+                        <td>@ag.Level</td>
+                        <td>@ag.Type</td>
+                        <td>@ag.StudentCount</td>
+                        <td>@ag.SubjectCount</td>
+                        <td>@ag.CAWeight</td>
+                        <td>@ag.ExamWeight</td>
+                        <td>@ag.GradeGroupName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+<script type="text/javascript">
+
+        var tbID = '#clDT';
+        var editBtn = "<button class='btn btn-default btn-xs clDTBtn' title='edit'><i class='fa fa-pencil-alt'></i></button>";
+        var setupBtn = "<button class='btn btn-warning btn-xs csDTBtn' title='setup'><i class='fa fa-wrench'></i></button>";
+
+        $(document).ready(function () {
+
+            $('.alert').show(500);
+
+            MyDTBtnInit("clDT");
+
+            var editTermUrl = "@Url.Action("_EditTerm", new { TermID = Model.TermID })";
+            $('#EditBtn').click(function () {
+
+                $.ajax({
+                    url: editTermUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        InitializeTermDates();
+                    }
+                });
+            });
+
+            var addUrl = "@Url.Action("_AddClass", new { TermID = Model.TermID, SchoolID = Model.HeaderViewModel.SchoolID })";
+            $('.clAddBtn').click(function () {
+
+                $.ajax({
+                    url: addUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+
+                        InitializePromotionChange();
+                    }
+                });
+            });
+
+            var clImportUrl = "@Url.Action("_ImportClasses", new { TermID = Model.TermID, SchoolID = Model.HeaderViewModel.SchoolID, SchoolYear = Model.SchoolYear, TermNumber = Model.TermNumber})";
+            $('.clImportBtn').click(function () {
+
+                $.ajax({
+                    url: clImportUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var clImportOtherUrl = "@Url.Action("_ImportOtherClasses", new { TermID = Model.TermID, SchoolID = Model.HeaderViewModel.SchoolID, SchoolYear = Model.SchoolYear, TermNumber = Model.TermNumber})";
+            $('.clImportOtherBtn').click(function () {
+
+                $.ajax({
+                    url: clImportOtherUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var editUrl = "@Url.Action("_EditClass", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $(tbID).on("click", '.clDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { ClassID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+
+                         InitializePromotionChange();
+                    }
+                });
+            });
+
+            var setupUrl = "@Url.Action("ClassSetup", new { ClassID = "123" })";
+            $(tbID).on("click", '.csDTBtn', function () {
+
+                window.location = setupUrl.replace("123", $(this.parentNode.parentNode).attr('id'));
+            });
+
+        });
+
+        function InitializeTermDates() {
+            InitializeDatePicker("ExamStartDate");
+            InitializeDatePicker("ExamEndDate");
+            InitializeDatePicker("ScoreCollectionDate");
+            InitializeDatePicker("VacationDate");
+            InitializeDatePicker("NextResumptionDate");
+        }
+
+        function InitializePromotionChange() {
+
+            $('#PViewContainer').on("change", '#IsPromotionalClass', function () {
+
+                if ($('#IsPromotionalClass').is(':checked')) {
+                    $('.PromotionDiv').show();
+                }
+                else {
+                    $('.PromotionDiv').hide();
+                }
+
+            });
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function EditTermSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            $('#pName').html(ag.Name);
+            $('#pNRDate').html(ag.NRDateStr);
+            $('#pDOpened').html(ag.DaysOpened);
+        }
+
+        function AddClassSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, setupBtn, ag.Name, ag.Level, ag.Type, ag.StudentCount, ag.SubjectCount, ag.CAWeight, ag.ExamWeight, ag.GradeGroupName];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.ClassID);
+        }
+
+        function EditClassSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, setupBtn, ag.Name, ag.Level, ag.Type, ag.StudentCount, ag.SubjectCount, ag.CAWeight, ag.ExamWeight, ag.GradeGroupName];
+
+            $(tbID).DataTable().row('#' + ag.ClassID).data(rowData).draw('page');
+        }
+
+        function DeleteClassSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+        }
+
+        function RedirectAction(data) {
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+</script>
+}
+
+

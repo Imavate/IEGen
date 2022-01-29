@@ -1,0 +1,382 @@
+﻿@model IEGen.Models.SubjectPageViewModel
+@{
+    ViewBag.Title = "Subject Score Entries";
+}
+
+<div id="AlertDiv"></div>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Subject Score Entries
+
+            <span class="pull-right hidden-xs" style="font-weight:bold">
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <a href="@Url.Action("School", "Setup")" title="Change Term">@Model.TermName</a>
+                }
+                else
+                {
+                    @Model.TermName
+                }
+            </span>
+        </div>
+    </div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="sDTSSSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="sDTSSSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="clearfix visible-xs" style="padding-top:5px"></div>
+            <div class="col-sm-6 col-md-7">
+                <button id="sDTSS_FiltersBtn" class="btn btn-default">More Filters</button>
+
+                @if (Model.HeaderViewModel.IsAdmin)
+                {
+                    <button type="button" class="btn btn-default delete">Delete Scores</button>
+                }
+
+                <button type="button" class="btn btn-default pull-right export"><i class="fa fa-file-excel"></i> Export All</button>
+            </div>
+        </div>
+        <div id="sDTSS_FiltersRow" class="filter-div" style="display:none">
+            <div class="panel panel-primary">
+                <div class="row filter-row">
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Class</label>
+                        @Html.DropDownListFor(m => m.ClassFilter, Model.ClassList, "-- All Classes --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Level</label>
+                        @Html.DropDownListFor(m => m.LevelFilter, Model.LevelList, "-- All Levels --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Teacher</label>
+                        @Html.DropDownListFor(m => m.TeacherFilter, Model.TeacherList, "-- All Teachers --", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-6 col-md-3 col-pd2">
+                        <label class="control-label">Entry Status</label>
+                        @Html.EnumDropDownListFor(m => m.StatusFilter, "-- Every Status --", new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table id="sDTSS" class="table table-hover table-bordered fullwidth" data-order="[]"></table>
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+    @Scripts.Render("~/bundles/malsupform")
+    @Scripts.Render("~/bundles/customval")
+
+    <script type="text/javascript">
+
+        var tbID = '#sDTSS';
+        var termID = '@Model.TermID';
+
+        $(document).ready(function () {
+
+            var columns = [{
+                "title": "",
+                "data": "EditButton",
+                "orderable": false
+            },
+            {
+                "title": "",
+                "data": "Button",
+                "orderable": false
+            },
+            {
+                "title": "Class",
+                "data": "ClassName"
+            },
+            {
+                "title": "Subject",
+                "data": "Name"
+            },
+            {
+                "title": "Result",
+                "data": "ResultName"
+            },
+            {
+                "title": "Teacher",
+                "data": "TeacherName"
+            },
+            {
+                "title": "Entered By",
+                "data": "EnteredByName",
+                "orderable": false
+            },
+            {
+                "title": "Time Entered",
+                "data": "TimeEnteredN"
+            },
+            {
+                "title": "Verified By",
+                "data": "VerifiedByName",
+                "orderable": false
+            },
+            {
+                "title": "Time Verified",
+                "data": "TimeVerifiedN"
+            },
+            {
+                "title": "%C",
+                "data": "PercentCorrected"
+            }];
+
+            var nodata = function (data) { };
+
+            var sDTSS_data = function (data) {
+                data.TermID = termID;
+                data.ClassID = $("#ClassFilter").val();
+                data.TeacherID = $("#TeacherFilter").val();
+                data.LevelID = $("#LevelFilter").val();
+                data.StatusID = $("#StatusFilter").val();
+            };
+
+            MyDTBtnInitSS("sDTSS", "@Url.Action("GetSubjectList", "Data", null)", columns, sDTSS_data);
+
+
+            //for server side... no auto post back
+            $("#sDTSSSearchBox").keyup(function (event) {
+                if (event.keyCode == 13) {
+                    $("#sDTSSSearchBtn").click();
+                }
+            });
+
+            $('#sDTSS_FiltersBtn').click(function () {
+                $('#sDTSS_FiltersRow').toggle();
+
+                if ($("#ClassFilter").val() != "" || $("#TeacherFilter").val() != "" || $("#LevelFilter").val() != "" || $("#StatusFilter").val() != "")
+                    $('#sDTSS_FiltersBtn').html('More Filters <i class="fa fa-filter fa-lg text-primary"></i>');
+                else
+                    $('#sDTSS_FiltersBtn').html("More Filters");
+
+                //going from open to close... note that toggle has already been called
+                if ($('#sDTSS_FiltersRow').css('display') === 'none') {
+                    $("#sDTSSSearchBtn").click();
+                }
+            });
+
+            var editUrl = "@Url.Action("_EditSubject", "Setup", new { SchoolID = Model.HeaderViewModel.SchoolID })";
+            $(tbID).on("click", '.eDTBtn', function () {
+
+                 $.ajax({
+                     url: editUrl,
+                     data: { SubjectID: $(this).data('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                     }
+                 });
+            });
+
+            var entryUrl = "@Url.Action("_ScoreEntry", new { UserID = Model.HeaderViewModel.UserID })";
+            $(tbID).on("click", '.sDTBtn', function () {
+
+                $.ajax({
+                    url: entryUrl,
+                    data: { SubjectID: $(this).data('id') },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        focusText();
+                    }
+                });
+            });
+
+            var verifyUrl = "@Url.Action("_ScoreVerify", new { UserID = Model.HeaderViewModel.UserID })";
+            $(tbID).on("click", '.svDTBtn', function () {
+
+                $.ajax({
+                    url: verifyUrl,
+                    data: { SubjectID: $(this).data('id') },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        focusText();
+                    }
+                });
+            });
+
+            $('.export').click(function () {
+
+                $("#sDTSSSearchBtn").click();
+                Download();
+
+            });
+
+            var deleteUrl = "@Url.Action("_DeleteScores", "Data", new { TermID = Model.TermID})";
+            $('.delete').click(function () {
+
+                $.ajax({
+                    url: deleteUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                        InitializeDeleteScores();
+                    }
+                });
+
+            });
+        });
+
+        function focusText() {
+            $(document).one('shown.bs.modal', '#PViewModal', function () {
+                $('.ftext:first').focus();
+            });
+        }
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function EditSubjectSuccess(data) {
+            ActionSuccess(data);
+        }
+
+        function DeleteSubjectSuccess(data) {
+            ActionSuccess(data);
+        }
+
+        function ActionSuccess(data) {
+
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+
+            $(tbID).DataTable().ajax.reload(null, false);
+
+            $('#AlertDiv').html(data);
+            $(".alert").show(300);
+        }
+
+        function ProcessVerifyError(xhr, status, error) {
+
+            if (xhr.status === 480) {
+
+                $('#MsgDiv').html('');
+                RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'BodyDiv', xhr);
+
+                $.validator.unobtrusive.parse($('#PViewContainer'));
+                focusText();
+            }
+            else {
+                RestoreElementShowAlert('SubmitBtnO', 'Save Changes', 'MsgDiv', xhr);
+            }
+        }
+
+
+        var downloadUrl = "@Url.Action("_DownloadSubjects")";
+        function Download() {
+
+            var clid = $("#ClassFilter").val();
+            var lvid = $("#LevelFilter").val();
+            var tid = $("#TeacherFilter").val();
+            var statusid = $("#StatusFilter").val();
+            var search = $("#sDTSSSearchBox").val();
+
+            var data = {
+                TermID: termID, ClassID: clid, LevelID: lvid, TeacherID: tid, StatusID: statusid, Search: search
+            };
+
+            window.location = downloadUrl + '?' + $.param(data);
+
+        }
+
+
+        var deleteRearrangeUrl = "@Url.Action("DeleteRearrangeScores", new { TermID = Model.TermID })";
+        var deleteScoresUrl = "@Url.Action("DeleteScores", new { TermID = Model.TermID })";
+        function InitializeDeleteScores() {
+
+            $('#DeleteBtn').click(function () {
+
+                if (window.confirm('Do you want to DELETE ALL SCORES for all Subjects in ALL Classes?')) {
+                    $.post({
+                        url: deleteScoresUrl,
+                        data: {},
+                        global: false,
+                        dataType: "json",
+                        beforeSend: function () {
+                            AddCog('DeleteBtn', 'Processing...');
+                        },
+                        success: function (r) {
+                            RefreshPage();
+                        },
+                        error: function (xhr) {
+                            RestoreElementShowAlert('DeleteBtn', 'Delete Only', 'MsgDiv', xhr);
+                        }
+                    });
+                }
+            });
+
+            $('#DeleteRearrangeBtn').click(function () {
+
+                if (window.confirm('Do you want to DELETE ALL SCORES and REARRANGE the students for all Subjects in ALL Classes?')) {
+                    $.post({
+                        url: deleteRearrangeUrl,
+                        data: {},
+                        global: false,
+                        dataType: "json",
+                        beforeSend: function () {
+                            AddCog('DeleteRearrangeBtn', 'Processing...');
+                        },
+                        success: function (r) {
+                            RefreshPage();
+                        },
+                        error: function (xhr) {
+                            RestoreElementShowAlert('DeleteRearrangeBtn', 'Delete and Rearrange', 'MsgDiv', xhr);
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

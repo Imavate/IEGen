@@ -1,0 +1,239 @@
+﻿@model IEGen.Models.ViewGradeGroupViewModel
+@{
+    ViewBag.Title = "Grade Setup: " + Model.DisplayName;
+}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            Grade Setup
+            <button id="EditBtn" class="btn btn-default btn-xs titlebtn1" title="Edit details"><i class="fa fa-pencil-alt"></i></button>
+
+            @Html.ActionLink("View All", "SchoolGrades", null, new { @class = "pull-right titlelink", title = "View all Grade Groups" })
+        </div>
+    </div>
+    <div class="form-panel-body row">
+        <div class="col-sm-4">
+            <label class="control-label">Name</label>
+            <p class="control-static">@Model.DisplayName</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-4">
+            <label class="control-label"># Grades</label>
+            <p id="GradeCount" class="control-static">@Model.GradeCount</p>
+            <div class="fm-sp"></div>
+        </div>
+        <div class="col-sm-4">
+            <label class="control-label">School</label>
+            <p class="control-static">@Model.SchoolName</p>
+            <div class="fm-sp"></div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading hidden-xs"><h4 class="panel-title">Grades</h4></div>
+    <div class="wide-panel-body">
+        <div class="row">
+            <div class="col-sm-6 col-md-5">
+                <div class="input-group">
+                    <input type="search" id="pmDTSearchBox" class="form-control" placeholder="Search for Entries" />
+                    <span class="input-group-btn">
+                        <button id="pmDTSearchBtn" class="btn btn-primary" title="Search for Entries">
+                            <span style="white-space:nowrap"><i class="fa fa-search fa-lg"></i>&nbsp;</span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-7">
+                <button type="button" class="btn btn-default hidden-xs pmAddBtn">Add New</button>
+            </div>
+        </div>
+        <table id="pmDT" class="table table-hover table-bordered fullwidth" data-order="[]">
+            <thead>
+                <tr>
+                    <th data-orderable="false" data-searchable="false"></th>
+                    <th>Name</th>
+                    <th>Lower Bound</th>
+                    <th>Upper Bound</th>
+                    <th>Summary Grade</th>
+                </tr>
+            </thead>
+            <tbody id="pmDTBody">
+                @foreach (var pm in Model.GradeList)
+                {
+                    <tr id="@pm.GradeID">
+                        <td><button class="btn btn-default btn-xs pmDTBtn" title="edit"><i class="fa fa-pencil-alt"></i></button></td>
+                        <td>@pm.Name</td>
+                        <td>@pm.LowerBound</td>
+                        <td>@pm.UpperBound</td>
+                        <td>@pm.SummaryGradeName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <span class="visible-xs" style="margin-top:5px;text-align:center"><button type="button" class="btn btn-primary pmAddBtn">Add New</button></span>
+
+    </div>
+</div>
+
+<div class="modal fade" id="PViewModal" tabindex="-1" role="dialog" aria-labelledby="PViewTitle" aria-hidden="true" data-backdrop="static">
+    <div id="PViewContainer" class="modal-dialog" role="document">
+    </div>
+</div>
+
+@{ Html.RenderPartial("_LoadingDiv"); }
+
+@section styles{ @Styles.Render("~/bundles/datatables-styles") }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryunobtrusive")
+    @Scripts.Render("~/bundles/datatables-core")
+    @Scripts.Render("~/bundles/datatables-buttons")
+
+    <script type="text/javascript">
+        var grpid = "@Model.GradeGroupID";
+
+        var tbID = '#pmDT';
+        var editBtn = "<button class='btn btn-default btn-xs pmDTBtn' title='edit'><i class='fa fa-pencil-alt'></i></button>";
+
+        $(document).ready(function () {
+
+            MyDTBtnInit("pmDT");
+
+            var addGradeUrl = "@Url.Action("_AddGrade", "Admin", new { GradeGroupID = Model.GradeGroupID })";
+            $('.pmAddBtn').click(function () {
+
+                $.ajax({
+                    url: addGradeUrl,
+                    data: { },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+            var editGradeUrl = "@Url.Action("_EditGrade", "Admin")";
+            $(tbID).on("click", '.pmDTBtn', function () {
+
+                 $.ajax({
+                     url: editGradeUrl,
+                     data: { GradeID: $(this.parentNode.parentNode).attr('id') },
+                     global: false,
+                     beforeSend: function () {
+                         $("#loadingDiv").show();
+                     },
+                     complete: function () {
+                         $("#loadingDiv").hide();
+                     },
+                     success: function (r) {
+                         ShowModal(r);
+                    }
+                });
+            });
+
+            var editGrpUrl = "@Url.Action("_EditGradeGroup", "Admin")";
+            $('#EditBtn').click(function () {
+                $.ajax({
+                    url: editGrpUrl,
+                    data: { GradeGroupID: grpid },
+                    global: false,
+                    beforeSend: function () {
+                        $("#loadingDiv").show();
+                    },
+                    complete: function () {
+                        $("#loadingDiv").hide();
+                    },
+                    success: function (r) {
+                        ShowModal(r);
+                    }
+                });
+            });
+
+        });
+
+        function ShowModal(content){
+            $('#PViewContainer').html(content);
+
+            $('#PViewModal').modal('show');
+            $.validator.unobtrusive.parse($('#PViewContainer'));
+        }
+
+        function HideModal(){
+            $('#PViewModal').modal('hide');
+            $('#PViewContainer').html("");
+        }
+
+        function AddGradeSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Name, ag.LowerBound, ag.UpperBound, ag.SummaryGradeName];
+
+            var tr = $(tbID).DataTable().row.add(rowData).draw().node();
+            $(tr).attr('id', ag.GradeID);
+            RefreshGradeCount();
+        }
+
+        function EditGradeSuccess(data) {
+
+            HideModal();
+
+            var ag = data;
+
+            var rowData = [editBtn, ag.Name, ag.LowerBound, ag.UpperBound, ag.SummaryGradeName];
+
+            $(tbID).DataTable().row('#' + ag.GradeID).data(rowData).draw('page');
+        }
+
+        function DeleteGradeSuccess(rowID) {
+
+            HideModal();
+
+            $(tbID).DataTable().row('#' + rowID).remove().draw();
+            RefreshGradeCount();
+        }
+
+        function EditGradeGroupSuccess(data) {
+
+            RefreshPage();
+        }
+
+        var unitsUrl = "@Url.Action("SchoolGrades")";
+        function DeleteGradeGroupSuccess(rowID) {
+
+            window.location = unitsUrl;
+
+        }
+
+        var GradeCountUrl = "@Url.Action("GradeCount", "Admin", new { GradeGroupID = Model.GradeGroupID })";
+        function RefreshGradeCount() {
+            $.ajax({
+                url: GradeCountUrl,
+                data: { },
+                global: false,
+                beforeSend: function () {
+                    $("#loadingDiv").show();
+                },
+                complete: function () {
+                    $("#loadingDiv").hide();
+                },
+                success: function (r) {
+                    $("#GradeCount").html(r);
+                }
+            });
+        }
+    </script>
+}
+
+
